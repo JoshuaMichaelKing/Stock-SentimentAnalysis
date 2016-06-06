@@ -16,5 +16,5 @@
 - config.ini to write information(App Key, App Secret and Callback URL) to connect sina open api
 - directory Data to save files
 
-Written By Joshua Guo(1992gq@gmail.com)
 These source code are distributed under the MIT.
+Written By Joshua Guo(1992gq@gmail.com)
