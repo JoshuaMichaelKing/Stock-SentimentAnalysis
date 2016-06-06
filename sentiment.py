@@ -38,18 +38,18 @@ def sentiment_lexicon_compute():
     # loading postive and negtive sentiment lexicon
     pos_lexicon_dict = {}
     neg_lexicon_dict = {}
-    lexicon = read_lexicon2dict('positive.txt', True)
+    lexicon = iohelper.read_lexicon2dict('positive.txt', True)
     pos_lexicon_dict = dict(pos_lexicon_dict, **lexicon)
-    lexicon = read_lexicon2dict('hownet-positive.txt')
+    lexicon = iohelper.read_lexicon2dict('hownet-positive.txt')
     pos_lexicon_dict = dict(pos_lexicon_dict, **lexicon)
-    lexicon = read_lexicon2dict('ntusd-positive.txt')
+    lexicon = iohelper.read_lexicon2dict('ntusd-positive.txt')
     pos_lexicon_dict = dict(pos_lexicon_dict, **lexicon)
 
-    lexicon = read_lexicon2dict('negative.txt', True)
+    lexicon = iohelper.read_lexicon2dict('negative.txt', True)
     neg_lexicon_dict = dict(neg_lexicon_dict, **lexicon)
-    lexicon = read_lexicon2dict('hownet-negative.txt')
+    lexicon = iohelper.read_lexicon2dict('hownet-negative.txt')
     neg_lexicon_dict = dict(neg_lexicon_dict, **lexicon)
-    lexicon = read_lexicon2dict('ntusd-negative.txt')
+    lexicon = iohelper.read_lexicon2dict('ntusd-negative.txt')
     neg_lexicon_dict = dict(neg_lexicon_dict, **lexicon)
 
     print('pos_lexicon_dict length : %d' % len(pos_lexicon_dict))
@@ -91,8 +91,8 @@ def sentiment_lexicon_compute():
     if status == 'yes':
         word_preprocessing(blog_corpus)
     else:
-        save_list2file_pickle(sentiment_index, _subdir, 'saindex_seq')
-        print('save_list2file_pickle success! %d %s' % (len(sentiment_index), _subdir))
+        iohelper.save_list2pickle(sentiment_index, _subdir, 'saindex_seq')
+        print('save_list2pickle success! %d %s' % (len(sentiment_index), _subdir))
 
 def sentiment_compute_average(pos_lexicon_dict, neg_lexicon_dict, tick_blog_segments, isPrint):
     '''
@@ -193,78 +193,9 @@ def word_preprocessing(blog_corpus):
                 cnt += 1
     new_word_list = sorted(new_word_dict.iteritems(), key=lambda d:d[1], reverse = False)
     print('new all word number %d' % len(new_word_list))
-    save_list2file_pickle(new_word_list, _subdir, 'wordDict')
-    save_list2file(new_word_list, _subdir, 'wordDict')
+    iohelper.save_list2pickle(new_word_list, _subdir, 'wordDict')
+    iohelper.save_list2txt(new_word_list, _subdir, 'wordDict')
     print('save word_list_tfidf success!')
-
-def read_lexicon2dict(fname, isNew=False):
-    '''
-    read sentiment lexicon to dict
-    '''
-    lexicon_dict = {}
-    filepath = './Dictionary/' + fname
-    readfile = codecs.open(filepath, 'r', 'utf-8')
-    output = readfile.readlines()  # 对于小文件可以一下全部读出
-    for line in output:
-        line = line.replace('\n', '')
-        if isNew:
-            wlist = line.split(' ')
-            if len(wlist) > 1:
-                lexicon_dict[wlist[0]] = int(wlist[1])
-        else:
-            line = line.replace(' ', '')
-            lexicon_dict[line] = 1
-    readfile.close()
-    return lexicon_dict
-
-def read_pickle2list(subdir, fname):
-    '''
-    read pickle to word list and get tfidf
-    '''
-    filepath = './Data/' + subdir + '/' + fname + '.pkl'
-    output = open(filepath, 'rb')
-    # Pickle dictionary using protocol 0.
-    word_seq = pickle.load(output)
-    output.close()
-    return word_seq
-
-def save_list2file_pickle(word_list_tfidf, subdir, fname):
-    '''
-    save word list and tfidf to file by pickle
-    '''
-    filepath = './Data/' + subdir + '/' + fname + '.pkl'
-    output = open(filepath, 'wb')
-    # Pickle dictionary using protocol 0.
-    pickle.dump(word_list_tfidf, output)
-    output.close()
-
-def save_list2file(word_list_tfidf, subdir, fname):
-    '''
-    save list to txt, add \n to every list member's end
-    '''
-    filepath = './Data/' + subdir + '/' + fname + '.txt'
-    f = codecs.open(filepath, 'a', 'utf-8')
-    for tp in word_list_tfidf:
-        f.write(tp[0] + ':' + str(tp[1]) + '\n')
-    f.close()
-
-def read_file2list(fname, subdir=None):
-    '''
-    read txt(sina microblog) to list
-    '''
-    bloglist = []
-    filepath = ''
-    if subdir is None:
-        filepath = './Data/' + fname + '.txt'
-    else:
-        filepath = './Data/' + subdir + '/' + fname + '.txt'
-    readfile = codecs.open(filepath, 'r', 'utf-8')
-    output = readfile.readlines()  # 对于小文件可以一下全部读出
-    for weibo in output:
-        weibo = weibo.replace('\n', '')
-        bloglist.append(weibo)
-    readfile.close()
-    return bloglist
 
 def is_word_invalid(word):
     '''
@@ -313,7 +244,7 @@ def word_tokenization(fname, subdir=None):
     count = 0
     seg_list = []
     try:
-        tick_blog_list = read_file2list(fname, subdir)
+        tick_blog_list = iohelper.read_txt2list(fname, subdir)
         for blog in tick_blog_list:
             if blog != '':
                 count += 1

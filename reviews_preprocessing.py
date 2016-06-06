@@ -7,7 +7,10 @@ import os, sys, codecs, logging, pickle
 import jieba
 from math import log
 import datetime as dt
+
+import iohelper
 import stocktime as st
+
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
@@ -31,18 +34,18 @@ def pos_neg_cut_test():
     # loading postive and negtive sentiment lexicon
     pos_lexicon_dict = {}
     neg_lexicon_dict = {}
-    lexicon = read_lexicon2dict('positive.txt', True)
+    lexicon = iohelper.read_lexicon2dict('positive.txt', True)
     pos_lexicon_dict = dict(pos_lexicon_dict, **lexicon)
-    lexicon = read_lexicon2dict('hownet-positive.txt')
+    lexicon = iohelper.read_lexicon2dict('hownet-positive.txt')
     pos_lexicon_dict = dict(pos_lexicon_dict, **lexicon)
-    lexicon = read_lexicon2dict('ntusd-positive.txt')
+    lexicon = iohelper.read_lexicon2dict('ntusd-positive.txt')
     pos_lexicon_dict = dict(pos_lexicon_dict, **lexicon)
 
-    lexicon = read_lexicon2dict('negative.txt', True)
+    lexicon = iohelper.read_lexicon2dict('negative.txt', True)
     neg_lexicon_dict = dict(neg_lexicon_dict, **lexicon)
-    lexicon = read_lexicon2dict('hownet-negative.txt')
+    lexicon = iohelper.read_lexicon2dict('hownet-negative.txt')
     neg_lexicon_dict = dict(neg_lexicon_dict, **lexicon)
-    lexicon = read_lexicon2dict('ntusd-negative.txt')
+    lexicon = iohelper.read_lexicon2dict('ntusd-negative.txt')
     neg_lexicon_dict = dict(neg_lexicon_dict, **lexicon)
 
     review_list_day = ['20160405', '20160406', '20160407', '20160408',
@@ -69,7 +72,7 @@ def pos_neg_cut_test():
                 hour = tick_now.hour
                 minute = tick_now.minute
                 fname = str(hour * 100 + minute)
-                tick_blog_list = read_file2list(fname, subdir)
+                tick_blog_list = iohelper.read_txt2list(fname, subdir)
                 count += len(tick_blog_list)
                 for each_blog in tick_blog_list:
                     if each_blog != '':
@@ -111,75 +114,6 @@ def sentiment_logarithm_estimation(pos_lexicon_dict, neg_lexicon_dict, sentence_
             neg_count += neg_lexicon_dict[word]
     tick_value_tmp = log(float(1 + pos_count) / float(1 + neg_count))
     return tick_value_tmp
-
-def read_lexicon2dict(fname, isNew=False):
-    '''
-    read sentiment lexicon to dict
-    '''
-    lexicon_dict = {}
-    filepath = './Dictionary/' + fname
-    readfile = codecs.open(filepath, 'r', 'utf-8')
-    output = readfile.readlines()  # 对于小文件可以一下全部读出
-    for line in output:
-        line = line.replace('\n', '')
-        if isNew:
-            wlist = line.split(' ')
-            if len(wlist) > 1:
-                lexicon_dict[wlist[0]] = int(wlist[1])
-        else:
-            line = line.replace(' ', '')
-            lexicon_dict[line] = 1
-    readfile.close()
-    return lexicon_dict
-
-def read_pickle2list(subdir, fname):
-    '''
-    read pickle to word list and get tfidf
-    '''
-    filepath = './Data/' + subdir + '/' + fname + '.pkl'
-    output = open(filepath, 'rb')
-    # Pickle dictionary using protocol 0.
-    word_seq = pickle.load(output)
-    output.close()
-    return word_seq
-
-def save_list2file_pickle(word_list_tfidf, subdir, fname):
-    '''
-    save word list and tfidf to file by pickle
-    '''
-    filepath = './Data/' + subdir + '/' + fname + '.pkl'
-    output = open(filepath, 'wb')
-    # Pickle dictionary using protocol 0.
-    pickle.dump(word_list_tfidf, output)
-    output.close()
-
-def save_list2file(word_list_tfidf, subdir, fname):
-    '''
-    save list to txt, add \n to every list member's end
-    '''
-    filepath = './Data/' + subdir + '/' + fname + '.txt'
-    f = codecs.open(filepath, 'a', 'utf-8')
-    for tp in word_list_tfidf:
-        f.write(tp[0] + ':' + str(tp[1]) + '\n')
-    f.close()
-
-def read_file2list(fname, subdir=None):
-    '''
-    read txt(sina microblog) to list
-    '''
-    bloglist = []
-    filepath = ''
-    if subdir is None:
-        filepath = './Data/' + fname + '.txt'
-    else:
-        filepath = './Data/' + subdir + '/' + fname + '.txt'
-    readfile = codecs.open(filepath, 'r', 'utf-8')
-    output = readfile.readlines()  # 对于小文件可以一下全部读出
-    for weibo in output:
-        weibo = weibo.replace('\n', '')
-        bloglist.append(weibo)
-    readfile.close()
-    return bloglist
 
 def is_word_invalid(word):
     '''

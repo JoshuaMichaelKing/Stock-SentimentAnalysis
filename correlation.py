@@ -4,13 +4,15 @@
 from __future__ import print_function
 from __future__ import division
 import os, sys, pickle
-import stocktime as st
 import datetime as dt
 from math import sqrt
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter, MaxNLocator
+
+import iohelper
+import stocktime as st
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -32,13 +34,13 @@ def main():
     up_down_num_statistics()
 
     # Analysis 2 : seq_process - index sum sequence
-    shindex_seq = read_pickle2list('shindex_seq.pkl', subdir)  # shanghai composite index sequence
+    shindex_seq = iohelper.read_pickle2list('shindex_seq.pkl', subdir)  # shanghai composite index sequence
     if len(shindex_seq) == 50:
         shindex_seq.pop(25)
         shindex_seq.pop(0)
     shindex_seq = [float(index) for index in shindex_seq]
     saindex_seq = []    # sentiment index sequence
-    tmp = read_pickle2list('saindex_seq.pkl', subdir)
+    tmp = iohelper.read_pickle2list('saindex_seq.pkl', subdir)
     if len(tmp) == 50:
         tmp.pop(25)
         tmp.pop(0)
@@ -76,7 +78,7 @@ def main():
 
 def up_down_num_statistics():
     shindex_seq = []
-    tmp = read_pickle2list('shindex_seq.pkl', subdir)
+    tmp = iohelper.read_pickle2list('shindex_seq.pkl', subdir)
     if len(tmp) == 50:
         tmp.pop(25)
         tmp.pop(0)
@@ -87,7 +89,7 @@ def up_down_num_statistics():
         else:
             shindex_seq.append(tmp[i] - tmp[i - 1])
 
-    saindex_seq = read_pickle2list('saindex_seq.pkl', subdir)
+    saindex_seq = iohelper.read_pickle2list('saindex_seq.pkl', subdir)
     if len(saindex_seq) == 50:
         saindex_seq.pop(25)
         saindex_seq.pop(0)
@@ -98,16 +100,6 @@ def up_down_num_statistics():
         if (shindex_seq[i] > 0 and saindex_seq[i] > 0) or (shindex_seq[i] < 0 and saindex_seq[i] < 0) or (shindex_seq[i] == 0 and saindex_seq[i] == 0):
             count += 1
     print('up down common numbers : %d' % count)
-
-def read_pickle2list(fname, subdir):
-    '''
-    read pickle to list
-    '''
-    output = open('.\\Data\\' + subdir + '\\' + fname, 'rb')
-    # Pickle dictionary using protocol 0.
-    index_seq = pickle.load(output)
-    output.close()
-    return index_seq
 
 def normalization_min_max(datalist):
     '''
