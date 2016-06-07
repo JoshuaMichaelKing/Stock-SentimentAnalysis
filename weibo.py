@@ -32,7 +32,7 @@ def main():
     print('APP_KEY:%s  APP_SECRET:%s  CALLBACK_URL:%s' % (APP_KEY, APP_SECRET, CALLBACK_URL))
     client = APIClient(SinaWeiboMixin, app_key=APP_KEY, app_secret=APP_SECRET, redirect_uri=CALLBACK_URL)
     url = client.get_authorize_url()    # redirect the user to 'url'
-    # print(url)
+    print(url)
     # needGetCode = raw_input("Do you need to get code from callback in browser? Please input yes or no!")
     needGetCode = 'no'
     code = ''
@@ -43,8 +43,8 @@ def main():
         print(r.access_token)  # access token，e.g., abc123xyz456
         print(r.expires)      # token expires time, UNIX timestamp, e.g., 1384826449.252 (10:01 am, 19 Nov 2013, UTC+8:00)
     # 测试版本access_token的时间期限为1天，过期后再重新获取
-    access_token = '2.00TD47_Gv7rSwBd7c70e9da30PlWbc'
-    expires = 1614584749.0
+    access_token = '2.00TD47_Gv7rSwB6b1fbd6797YonR5C'
+    expires = 1622967755.0
     client.set_access_token(access_token, expires)
 
     # After Initialize API Authorization...
