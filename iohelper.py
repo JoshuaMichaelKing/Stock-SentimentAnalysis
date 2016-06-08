@@ -56,12 +56,12 @@ def read_txt2list(fname, subdir=None):
     readfile.close()
     return bloglist
 
-def save_list2txt(sentence_list, filefullpath):
+def save_list2file(sentence_list, filefullpath):
     '''
     save list to txt, add \n to every list member's end
     '''
     f = codecs.open(filefullpath, 'a', 'utf-8')
-    for tp in word_list_tfidf:
+    for tp in sentence_list:
         f.write(tp + '\n')
     f.close()
 
@@ -76,34 +76,19 @@ def save_list2txt(word_list_tfidf, subdir, fname):
     f.close()
 
 # pickle <--> list
-def read_pickle2list(filefullpath):
-    '''
-    read pickle to word list and get tfidf
-    '''
-    output = open(filefullpath, 'rb')
-    # Pickle dictionary using protocol 0.
-    word_seq = pickle.load(output)
-    output.close()
-    return word_seq
-
-def read_pickle2list(fname, subdir):
+def read_pickle2list(fpath, fname=None):
     '''
     read pickle to list
     '''
-    output = open('./Data/' + subdir + '/' + fname, 'rb')
+    output = ''
+    if fname == None:
+        output = open('./Data/' + fpath + '/' + fname, 'rb')
+    else:
+        output = open(fpath, 'rb')
     # Pickle dictionary using protocol 0.
-    index_seq = pickle.load(output)
+    list_seq = pickle.load(output)
     output.close()
-    return index_seq
-
-def save_list2pickle(word_list_tfidf, filefullpath):
-    '''
-    save word list and tfidf to file by pickle
-    '''
-    output = open(filefullpath, 'wb')
-    # Pickle dictionary using protocol 0.
-    pickle.dump(word_list_tfidf, output)
-    output.close()
+    return list_seq
 
 def save_list2pickle(word_list_tfidf, subdir, fname):
     '''
