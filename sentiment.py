@@ -159,7 +159,7 @@ def word_preprocessing(blog_corpus):
     blog_corpus : [["", ""], ["", ""], ["", ""]], new_blog_corpus is the filtered one
     this function just preprocess the day blog from the saved file(eg:930.txt...) and process and integrate all to one list
     then to compute every word tfidf and extract the feature word using tfidf
-    lastly save the top word_tfidf into txt and pickle(20160311.txt or 20160311.pkl)
+    lastly save the top word_tfidf into txt and pickle(20160311/wordDict.txt or 20160311/wordDict.pkl)
     '''
     word_dict = {}
     new_blog_corpus = []

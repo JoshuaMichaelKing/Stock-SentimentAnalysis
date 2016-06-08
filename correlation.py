@@ -34,13 +34,13 @@ def main():
     up_down_num_statistics()
 
     # Analysis 2 : seq_process - index sum sequence
-    shindex_seq = iohelper.read_pickle2list('shindex_seq.pkl', subdir)  # shanghai composite index sequence
+    shindex_seq = iohelper.read_pickle2list(subdir, 'shindex_seq.pkl')  # shanghai composite index sequence
     if len(shindex_seq) == 50:
         shindex_seq.pop(25)
         shindex_seq.pop(0)
     shindex_seq = [float(index) for index in shindex_seq]
     saindex_seq = []    # sentiment index sequence
-    tmp = iohelper.read_pickle2list('saindex_seq.pkl', subdir)
+    tmp = iohelper.read_pickle2list(subdir, 'saindex_seq.pkl')
     if len(tmp) == 50:
         tmp.pop(25)
         tmp.pop(0)
@@ -78,7 +78,7 @@ def main():
 
 def up_down_num_statistics():
     shindex_seq = []
-    tmp = iohelper.read_pickle2list('shindex_seq.pkl', subdir)
+    tmp = iohelper.read_pickle2list(subdir, 'shindex_seq.pkl')
     if len(tmp) == 50:
         tmp.pop(25)
         tmp.pop(0)
@@ -89,7 +89,7 @@ def up_down_num_statistics():
         else:
             shindex_seq.append(tmp[i] - tmp[i - 1])
 
-    saindex_seq = iohelper.read_pickle2list('saindex_seq.pkl', subdir)
+    saindex_seq = iohelper.read_pickle2list(subdir, 'saindex_seq.pkl')
     if len(saindex_seq) == 50:
         saindex_seq.pop(25)
         saindex_seq.pop(0)

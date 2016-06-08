@@ -1,20 +1,24 @@
-## Correlating Stock Index Movement with Investor Sentiment on Social Network by Python 2.7
+## Correlating Stock Index Movement with Investor Sentiment on Social Network
 
 ### data explore and preprocessing
-- stocktime.py to provide the basic open time and close time of A stock in China
-- snspy.py(by liaoxuefeng) to get microblog
-- weibo.py to process every blog clean and save it to txt every 5 minutes
-- stockindex.py to get newest market data from sina js server and save list to pickle(shindex_seq.pkl), list contains every 5 minutes stock index
+- stocktime.py is to provide the basic open time and close time of A stock(Shanghai Composite Index) in China
+- snspy.py(supported by liaoxuefeng) is to get microblog
+- weibo.py is to process every blog clean and save it to txt every 5 minutes
+- stockindex.py is to get newest market data from sina js server and save list to pickle(shindex_seq.pkl), list contains every 5 minutes stock index
+
+### reviews preprocessing
+- reviews_preprocessing.py is to 
+-
 
 ### sentiment index computing
-- sentiment.py to compute index from Data/20160000/****.txt and save list to pickle(saindex_seq.pkl), list contains every 5 minutes sentiment index
+- sentiment.py is to compute index from Data/20160000/****.txt and save list to pickle(saindex_seq.pkl), list contains every 5 minutes sentiment index
 
 ### correlation analysis
-- correlation.py to correlate the sequence of sentiment index and shanghai composite index at a specified day
+- correlation.py is to correlate the sequence of sentiment index and shanghai composite index at a specified day
 
 ### other info
-- config.ini to write information(App Key, App Secret and Callback URL) to connect sina open api
-- directory Data to save files
+- config.ini is to write information(App Key, App Secret and Callback URL) to connect sina open api
+- Directory and Data is to save files
 
 These source code are distributed under the MIT.
 Written By Joshua Guo(1992gq@gmail.com)

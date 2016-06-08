@@ -56,6 +56,7 @@ def pos_neg_cut_test():
     pos_reviews = []
     neg_reviews = []
     mid_reviews = []
+    new_word_list = []
     print('{0}   {1}'.format(len(review_list_day), review_list_day))
 
     opentime1 = st.opentime1
@@ -82,9 +83,9 @@ def pos_neg_cut_test():
                             if is_word_invalid(seg) is False:
                                 tmp.append(seg)
                         result = sentiment_logarithm_estimation(pos_lexicon_dict, neg_lexicon_dict, tmp)
-                        print(result)
                         if result == 0:
                             mid_reviews.append(result)
+                            new_word_list.extend(tmp)
                         elif result < 0:
                             neg_reviews.append(result)
                         else:
@@ -96,6 +97,9 @@ def pos_neg_cut_test():
                 break
         print('{0}-{1}'.format(subdir, count))
     print('{0}-{1}-{2}'.format(len(neg_reviews), len(mid_reviews), len(pos_reviews)))
+    filepath = './Data/' + subdir + '/new_wordList.txt'
+    iohelper.save_list2file(new_word_list, filepath)
+    print('save_list2file new word list successfully!')
 
 def sentiment_logarithm_estimation(pos_lexicon_dict, neg_lexicon_dict, sentence_blog_segments):
     '''
