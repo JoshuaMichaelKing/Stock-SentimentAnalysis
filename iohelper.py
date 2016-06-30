@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-import os, sys, codecs, logging, pickle
+import os, sys, codecs, logging
+import cPickle as pickle
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
@@ -60,7 +61,7 @@ def save_list2file(sentence_list, filefullpath):
     '''
     save list to txt, add \n to every list member's end
     '''
-    f = codecs.open(filefullpath, 'a', 'utf-8')
+    f = codecs.open(filefullpath, 'w', 'utf-8')
     for tp in sentence_list:
         f.write(tp + '\n')
     f.close()
@@ -82,9 +83,9 @@ def read_pickle2list(fpath, fname=None):
     '''
     output = ''
     if fname == None:
-        output = open('./Data/' + fpath + '/' + fname, 'rb')
-    else:
         output = open(fpath, 'rb')
+    else:
+        output = open('./Data/' + fpath + '/' + fname, 'rb')
     # Pickle dictionary using protocol 0.
     list_seq = pickle.load(output)
     output.close()
