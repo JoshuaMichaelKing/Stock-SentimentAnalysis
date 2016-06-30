@@ -7,8 +7,8 @@
 - stockindex.py is to get newest market data from sina js server and save list to pickle(shindex_seq.pkl), list contains every 5 minutes stock index
 
 ### reviews preprocessing
-- reviews_preprocessing.py is to 
--
+- reviews_preprocessing.py is to seperate all the reviews into two part : positive and negative part(with some handful work)
+- use the seperated reviews to implement machine learning classifier
 
 ### sentiment index computing
 - sentiment.py is to compute index from Data/20160000/****.txt and save list to pickle(saindex_seq.pkl), list contains every 5 minutes sentiment index

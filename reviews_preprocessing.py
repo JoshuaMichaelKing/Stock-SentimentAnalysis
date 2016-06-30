@@ -50,9 +50,9 @@ def pos_neg_cut_test():
 
     review_list_day = ['20160405', '20160406', '20160407', '20160408',
     '20160411', '20160412', '20160413', '20160414', '20160415',
-    '2016018', '20160419', '20160420', '20160421',
-    '2016025', '20160426', '20160427', '20160429']
-    review_list_day = ['20160405']
+    '20160418', '20160419', '20160420', '20160421',
+    '20160425', '20160426', '20160427', '20160429']
+    # review_list_day = ['20160405']
     pos_reviews = []
     neg_reviews = []
     mid_reviews = []
@@ -68,12 +68,15 @@ def pos_neg_cut_test():
     for subdir in review_list_day:
         tick_now = opentime1
         count = 0
+        new_word_list = []
         while True:
             if (tick_now >= opentime1 and tick_now <= midclose) or (tick_now >= opentime2 and tick_now <= closetime):
                 hour = tick_now.hour
                 minute = tick_now.minute
                 fname = str(hour * 100 + minute)
                 tick_blog_list = iohelper.read_txt2list(fname, subdir)
+                # print(tick_blog_list[0])
+                # assert 0 == 1
                 count += len(tick_blog_list)
                 for each_blog in tick_blog_list:
                     if each_blog != '':
@@ -85,7 +88,7 @@ def pos_neg_cut_test():
                         result = sentiment_logarithm_estimation(pos_lexicon_dict, neg_lexicon_dict, tmp)
                         if result == 0:
                             mid_reviews.append(result)
-                            new_word_list.extend(tmp)
+                            new_word_list.append(each_blog)
                         elif result < 0:
                             neg_reviews.append(result)
                         else:
@@ -96,10 +99,10 @@ def pos_neg_cut_test():
             elif tick_now > closetime:
                 break
         print('{0}-{1}'.format(subdir, count))
+        filepath = './Data/' + subdir + '/new_wordList.txt'
+        iohelper.save_list2file(new_word_list, filepath)
+        print('save_list2file new word（mid polarity） list successfully!')
     print('{0}-{1}-{2}'.format(len(neg_reviews), len(mid_reviews), len(pos_reviews)))
-    filepath = './Data/' + subdir + '/new_wordList.txt'
-    iohelper.save_list2file(new_word_list, filepath)
-    print('save_list2file new word list successfully!')
 
 def sentiment_logarithm_estimation(pos_lexicon_dict, neg_lexicon_dict, sentence_blog_segments):
     '''

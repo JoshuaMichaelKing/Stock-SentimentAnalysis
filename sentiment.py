@@ -7,7 +7,10 @@ import os, sys, codecs, logging, pickle
 import jieba
 from math import log
 import datetime as dt
+
+import iohelper
 import stocktime as st
+
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
@@ -25,7 +28,7 @@ def main():
     FILE = os.curdir
     logging.basicConfig(filename=os.path.join(FILE,'log.txt'), level=logging.ERROR)
     print('correlation date %s', _subdir)
-    # sentiment_lexicon_compute()
+    sentiment_lexicon_compute()
 
 def sentiment_ml_compute():
     pass

@@ -25,7 +25,7 @@ __author__ = 'Joshua Guo (1992gq@gmail.com)'
 Python Investor Sentiment Index and Shanghai Composite Index Correlation Analysis.
 '''
 
-subdir = '20160328'
+subdir = '20160329'
 
 def main():
     print('correlation date %s' % subdir)
@@ -61,9 +61,9 @@ def main():
     shindex_seq = normalization_zero_mean(shindex_seq)
     saindex_seq = normalization_zero_mean(saindex_seq)
 
-    tick_seq = tick_seq[1:47]        # two tick lag
-    shindex_seq = shindex_seq[1:47]  # two tick lag
-    saindex_seq = saindex_seq[0:46]  # two tick lag to show the sentiment
+    # tick_seq = tick_seq[1:47]        # two tick lag
+    # shindex_seq = shindex_seq[1:47]  # two tick lag
+    # saindex_seq = saindex_seq[0:46]  # two tick lag to show the sentiment
 
     # tick_seq = tick_seq[2:47]        # three tick lag
     # shindex_seq = shindex_seq[2:47]  # three tick lag
