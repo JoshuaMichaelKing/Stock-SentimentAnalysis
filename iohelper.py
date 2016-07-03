@@ -82,23 +82,27 @@ def read_pickle2list(fpath, fname=None):
     read pickle to list
     '''
     output = ''
-    if fname == None:
+    if fname is None:
         output = open(fpath, 'rb')
     else:
-        output = open('./Data/' + fpath + '/' + fname, 'rb')
+        output = open('./Data/' + fpath + '/' + fname + '.pkl', 'rb')
     # Pickle dictionary using protocol 0.
     list_seq = pickle.load(output)
     output.close()
     return list_seq
 
-def save_list2pickle(word_list_tfidf, subdir, fname):
+def save_list2pickle(word_list, fpath, fname=None):
     '''
-    save word list and tfidf to file by pickle
+    save word list to file by pickle
     '''
-    filepath = './Data/' + subdir + '/' + fname + '.pkl'
-    output = open(filepath, 'wb')
+    output = ''
+    if fname is None:
+        output = open(fpath, 'wb')
+    else:
+        output = open('./Data/' + fpath + '/' + fname + '.pkl', 'wb')
+
     # Pickle dictionary using protocol 0.
-    pickle.dump(word_list_tfidf, output)
+    pickle.dump(word_list, output)
     output.close()
 
 if __name__ == '__main__':

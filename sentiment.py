@@ -22,12 +22,9 @@ __author__ = 'Joshua Guo (1992gq@gmail.com)'
 Python : Feature Extraction and Sentiment Index Computing.
 '''
 
-_subdir = '20160329'
-
 def main():
     FILE = os.curdir
-    logging.basicConfig(filename=os.path.join(FILE,'log.txt'), level=logging.ERROR)
-    print('correlation date %s', _subdir)
+    logging.basicConfig(filename=os.path.join(FILE, 'log.txt'), level=logging.ERROR)
     sentiment_lexicon_compute()
 
 def sentiment_ml_compute():
@@ -41,18 +38,18 @@ def sentiment_lexicon_compute():
     # loading postive and negtive sentiment lexicon
     pos_lexicon_dict = {}
     neg_lexicon_dict = {}
-    lexicon = iohelper.read_lexicon2dict('positive.txt', True)
-    pos_lexicon_dict = dict(pos_lexicon_dict, **lexicon)
     lexicon = iohelper.read_lexicon2dict('hownet-positive.txt')
     pos_lexicon_dict = dict(pos_lexicon_dict, **lexicon)
     lexicon = iohelper.read_lexicon2dict('ntusd-positive.txt')
     pos_lexicon_dict = dict(pos_lexicon_dict, **lexicon)
+    lexicon = iohelper.read_lexicon2dict('positive.txt', True)
+    pos_lexicon_dict = dict(pos_lexicon_dict, **lexicon)
 
-    lexicon = iohelper.read_lexicon2dict('negative.txt', True)
-    neg_lexicon_dict = dict(neg_lexicon_dict, **lexicon)
     lexicon = iohelper.read_lexicon2dict('hownet-negative.txt')
     neg_lexicon_dict = dict(neg_lexicon_dict, **lexicon)
     lexicon = iohelper.read_lexicon2dict('ntusd-negative.txt')
+    neg_lexicon_dict = dict(neg_lexicon_dict, **lexicon)
+    lexicon = iohelper.read_lexicon2dict('negative.txt', True)
     neg_lexicon_dict = dict(neg_lexicon_dict, **lexicon)
 
     print('pos_lexicon_dict length : %d' % len(pos_lexicon_dict))
@@ -64,39 +61,54 @@ def sentiment_lexicon_compute():
     closetime = st.closetime
 
     tick_delta = dt.timedelta(minutes=5)
-    tick_now = opentime1
 
-    blog_corpus = []
-    sentiment_index = []
     status = raw_input("Construct dictionary or compute sentiment index? Please input yes(feature extraction) or no(compute sentiment index)!")
     isPrint = False
-    while True:
-        if (tick_now >= opentime1 and tick_now <= midclose) or (tick_now >= opentime2 and tick_now <= closetime):
-            hour = tick_now.hour
-            minute = tick_now.minute
-            if hour == 13 and minute == 45:
-                isPrint = False  # use the flag to print the word score in sentiment computing
-            else:
-                isPrint = False
-            fname = str(hour * 100 + minute)
-            tick_blog_list = word_tokenization(fname, _subdir)
-            blog_corpus.extend(tick_blog_list)
-            tick_now += tick_delta
-            # Compute Sentiment Index
-            if status != 'yes':
-                tick_value_tmp = sentiment_compute_logarithm(pos_lexicon_dict, neg_lexicon_dict, tick_blog_list, isPrint)
-                sentiment_index.append(tick_value_tmp)
-        elif tick_now > midclose and tick_now < opentime2:
-            tick_now = opentime2
-        elif tick_now > closetime:
-            break
-    # not necessary if you have processed it to word_tfidf list txt pkl
-    if status == 'yes':
-        word_preprocessing(blog_corpus)
-    else:
-        iohelper.save_list2pickle(sentiment_index, _subdir, 'saindex_seq')
-        print('save_list2pickle success! %d %s' % (len(sentiment_index), _subdir))
 
+    review_list_day = []
+    date_of_april = ['20160405', '20160406', '20160407', '20160408',
+    '20160411', '20160412', '20160413', '20160414', '20160415',
+    '20160418', '20160419', '20160420', '20160421',
+    '20160425', '20160426', '20160427', '20160429']
+    review_list_day.extend(date_of_april)
+    review_list_day = ['20160405']  # just for test : to be removed
+
+    for subdir in review_list_day:
+        tick_now = opentime1
+        blog_corpus = []
+        sentiment_index = []
+        print('The date to be handled : {0}'.format(subdir))
+        while True:
+            if (tick_now >= opentime1 and tick_now <= midclose) or (tick_now >= opentime2 and tick_now <= closetime):
+                hour = tick_now.hour
+                minute = tick_now.minute
+                if hour == 13 and minute == 45:
+                    isPrint = False  # use the flag to print the word score in sentiment computing
+                else:
+                    isPrint = False
+                fname = str(hour * 100 + minute)
+                tick_blog_list = word_tokenization(fname, subdir)   # convert 5-min reviews to blog list lisk this : [[,], [,],...]
+                blog_corpus.extend(tick_blog_list)
+                tick_now += tick_delta
+                # Compute Sentiment Index
+                if status != 'yes':
+                    tick_value_tmp = sentiment_compute_logarithm(pos_lexicon_dict, neg_lexicon_dict, tick_blog_list, isPrint)
+                    sentiment_index.append(tick_value_tmp)
+            elif tick_now > midclose and tick_now < opentime2:
+                tick_now = opentime2
+            elif tick_now > closetime:
+                break
+        # not necessary if you have processed it to word_tfidf list txt pkl
+        if status == 'yes':
+            word_preprocessing(blog_corpus, subdir)
+            print('%s : word selected from blog_corpus successfully!' % (subdir))
+        else:
+            iohelper.save_list2pickle(sentiment_index, subdir, 'saindex_seq')
+            print('%s : save_list2pickle successfully! %d' % (subdir, len(sentiment_index)))
+
+    print('ending.....')
+
+# obsolete
 def sentiment_compute_average(pos_lexicon_dict, neg_lexicon_dict, tick_blog_segments, isPrint):
     '''
     basic plus for positive and minus for negative to compute index average
@@ -114,11 +126,11 @@ def sentiment_compute_average(pos_lexicon_dict, neg_lexicon_dict, tick_blog_segm
         for word in doc_tmp:
             if word in pos_lexicon_dict:
                 if isPrint:
-                    print("%s +%d" % (word, pos_lexicon_dict[word]))
+                    print("%s + %d" % (word, pos_lexicon_dict[word]))
                 sentence_count += pos_lexicon_dict[word]
             elif word in neg_lexicon_dict:
                 if isPrint:
-                    print("%s -%d" % (word, neg_lexicon_dict[word]))
+                    print("%s - %d" % (word, neg_lexicon_dict[word]))
                 sentence_count -= neg_lexicon_dict[word]
         index_list.append(sentence_count)
     if len(index_list) != 0:
@@ -145,11 +157,11 @@ def sentiment_compute_logarithm(pos_lexicon_dict, neg_lexicon_dict, tick_blog_se
         for word in doc_tmp:
             if word in pos_lexicon_dict:
                 if isPrint:
-                    print("%s +%d" % (word, pos_lexicon_dict[word]))
+                    print("%s + %d" % (word, pos_lexicon_dict[word]))
                 pos_count += pos_lexicon_dict[word]
             elif word in neg_lexicon_dict:
                 if isPrint:
-                    print("%s -%d" % (word, neg_lexicon_dict[word]))
+                    print("%s - %d" % (word, neg_lexicon_dict[word]))
                 neg_count += neg_lexicon_dict[word]
         pos_list.append(pos_count)
         neg_list.append(neg_count)
@@ -157,7 +169,7 @@ def sentiment_compute_logarithm(pos_lexicon_dict, neg_lexicon_dict, tick_blog_se
     print('%f' % tick_value_tmp)
     return tick_value_tmp
 
-def word_preprocessing(blog_corpus):
+def word_preprocessing(blog_corpus, subdir):
     '''
     blog_corpus : [["", ""], ["", ""], ["", ""]], new_blog_corpus is the filtered one
     this function just preprocess the day blog from the saved file(eg:930.txt...) and process and integrate all to one list
@@ -175,30 +187,30 @@ def word_preprocessing(blog_corpus):
                 tmp.append(word)
                 word_dict[word] = 0
         new_blog_corpus.append(tmp)
-    print('all microblog number and new %d %d' % (len(blog_corpus), len(new_blog_corpus)))
-    print('all word number %d' % len(word_dict))
+    print('word_preprocessing-all microblog number and new %d %d' % (len(blog_corpus), len(new_blog_corpus)))
+    print('word_preprocessing-all word number %d' % len(word_dict))
 
-    new_word_dict = {}
+    word_tfidf_dict = {}
     for doc in new_blog_corpus:
         score_dict = {}
         for term in doc:
             tfidf = tf_idf(term, doc, new_blog_corpus)
             score_dict[term] = tfidf
         score_list = sorted(score_dict.iteritems(), key=lambda d:d[1], reverse = True)
-        cnt = 0
-        for tp in score_list:
-            if cnt < 3:
-                if tp[0] in new_word_dict:
-                    if new_word_dict[tp[0]] < tp[1]:
-                        new_word_dict[tp[0]] = tp[1]
-                else:
-                    new_word_dict[tp[0]] = tp[1]
-                cnt += 1
-    new_word_list = sorted(new_word_dict.iteritems(), key=lambda d:d[1], reverse = False)
-    print('new all word number %d' % len(new_word_list))
-    iohelper.save_list2pickle(new_word_list, _subdir, 'wordDict')
-    iohelper.save_list2txt(new_word_list, _subdir, 'wordDict')
-    print('save word_list_tfidf success!')
+        if (len(score_list) >= 2):
+            for cur in range(2):
+                word_tfidf_dict[score_list[cur][0]] = score_list[cur][1]
+    word_tfidf_list = []
+    # word_tfidf_list = sorted(word_tfidf_dict.iteritems(), key=lambda d:d[1], reverse = False)
+    for word in word_tfidf_dict:
+        tp = []
+        tp.append(word)
+        tp.append(word_tfidf_dict[word])
+        word_tfidf_list.append(tp)
+    print('word_preprocessing-all new word number %d' % len(word_tfidf_list))
+    iohelper.save_list2pickle(word_tfidf_list, subdir, 'wordTFDict')
+    iohelper.save_list2txt(word_tfidf_list, subdir, 'wordTFDict')
+    print('word_preprocessing-save word_list_tfidf success!')
 
 def is_word_invalid(word):
     '''

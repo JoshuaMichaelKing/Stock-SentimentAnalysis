@@ -29,7 +29,8 @@ def main():
 
 def pos_neg_cut_test():
     '''
-    先通过已构建词典将4月的评论初步分割成积极和消极文本
+    based on the constructed stock-oriented lexicon, initially seperate the whole reviews into pwo part automatically : pos and neg
+    then adjust it manually
     '''
     # loading postive and negtive sentiment lexicon
     pos_lexicon_dict = {}
@@ -48,15 +49,29 @@ def pos_neg_cut_test():
     lexicon = iohelper.read_lexicon2dict('ntusd-negative.txt')
     neg_lexicon_dict = dict(neg_lexicon_dict, **lexicon)
 
-    review_list_day = ['20160405', '20160406', '20160407', '20160408',
+    date_of_april = ['20160405', '20160406', '20160407', '20160408',
     '20160411', '20160412', '20160413', '20160414', '20160415',
     '20160418', '20160419', '20160420', '20160421',
     '20160425', '20160426', '20160427', '20160429']
-    # review_list_day = ['20160405']
+    date_of_may = ['20160503', '20160504', '20160505', '20160506',
+    '20160509', '20160510', '20160511', '20160512', '20160513',
+    '20160516', '20160517', '20160518', '20160519', '20160520',
+    '20160523', '20160524', '20160525', '20160526', '20160527',
+    '20160530', '20160531']
+    date_of_june = ['20160601', '20160602', '20160606',
+    '20160613', '20160614', '20160615',
+    '20160620', '20160622', '20160624', '20160628']
+    review_list_day.extend(date_of_april)
+    review_list_day.extend(date_of_may)
+    review_list_day.extend(date_of_june)
+    review_list_day = ['20160405']  # just for test : to be removed
+
+    pos_scores = []
+    neg_scores = []
+    mid_scores = []
+    new_word_list = []
     pos_reviews = []
     neg_reviews = []
-    mid_reviews = []
-    new_word_list = []
     print('{0}   {1}'.format(len(review_list_day), review_list_day))
 
     opentime1 = st.opentime1
@@ -87,12 +102,14 @@ def pos_neg_cut_test():
                                 tmp.append(seg)
                         result = sentiment_logarithm_estimation(pos_lexicon_dict, neg_lexicon_dict, tmp)
                         if result == 0:
-                            mid_reviews.append(result)
+                            mid_scores.append(result)
                             new_word_list.append(each_blog)
                         elif result < 0:
-                            neg_reviews.append(result)
+                            neg_scores.append(result)
+                            neg_reviews.append(each_blog)
                         else:
-                            pos_reviews.append(result)
+                            pos_scores.append(result)
+                            pos_reviews.append(each_blog)
                 tick_now += tick_delta
             elif tick_now > midclose and tick_now < opentime2:
                 tick_now = opentime2
@@ -101,8 +118,10 @@ def pos_neg_cut_test():
         print('{0}-{1}'.format(subdir, count))
         filepath = './Data/' + subdir + '/new_wordList.txt'
         iohelper.save_list2file(new_word_list, filepath)
-        print('save_list2file new word（mid polarity） list successfully!')
-    print('{0}-{1}-{2}'.format(len(neg_reviews), len(mid_reviews), len(pos_reviews)))
+        print('save_list2file new word[mid polarity] list successfully!')
+    iohelper.save_list2file(neg_reviews, './Data/neg_reviews.txt')
+    iohelper.save_list2file(pos_reviews, './Data/pos_reviews.txt')
+    print('{0}-{1}-{2}'.format(len(neg_scores), len(mid_scores), len(pos_scores)))
 
 def sentiment_logarithm_estimation(pos_lexicon_dict, neg_lexicon_dict, sentence_blog_segments):
     '''
