@@ -3,7 +3,10 @@
 
 from __future__ import print_function
 import os, sys, codecs, logging
-import cPickle as pickle
+try:
+    import cPickle as pickle
+except:
+    import pickle
 reload(sys)
 sys.setdefaultencoding('utf-8')
 

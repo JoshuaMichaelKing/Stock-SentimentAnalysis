@@ -25,13 +25,27 @@ __author__ = 'Joshua Guo (1992gq@gmail.com)'
 Python Investor Sentiment Index and Shanghai Composite Index Correlation Analysis.
 '''
 
-subdir = '20160329'
-
 def main():
-    print('correlation date %s' % subdir)
+    review_list_day = []
+    date_of_april = ['20160405', '20160406', '20160407', '20160408',
+    '20160411', '20160412', '20160413', '20160414', '20160415',
+    '20160418', '20160419', '20160420', '20160421',
+    '20160425', '20160426', '20160427', '20160429']
+    review_list_day.extend(date_of_april)
+    review_list_day = ['20160406']  # just for test : to be removed
+
+    for day in review_list_day:
+        print('------correlation date %s------' % day)
+        correlation_analysis(day)
+        print()
+
+def correlation_analysis(subdir):
+    '''
+    correlating shindex_seq with saindex_seq
+    '''
 
     # Analysis 1 : up down statistics
-    up_down_num_statistics()
+    up_down_num_statistics(subdir)
 
     # Analysis 2 : seq_process - index sum sequence
     shindex_seq = iohelper.read_pickle2list(subdir, 'shindex_seq')  # shanghai composite index sequence
@@ -45,7 +59,7 @@ def main():
         tmp.pop(25)
         tmp.pop(0)
     tmp = [float(index) for index in tmp]
-    for i in range(len(tmp)):
+    for i in xrange(len(tmp)):
         saindex_seq.append(sum(tmp[0:i]))
 
     # time series day
@@ -74,9 +88,9 @@ def main():
     print('ti day index : %s %d' % (tick_seq, len(tick_seq)))
 
     print(pearson_corr(shindex_seq, saindex_seq))
-    plot_index_and_sentiment(tick_seq, shindex_seq, saindex_seq)
+    plot_index_and_sentiment(tick_seq, shindex_seq, saindex_seq, subdir)
 
-def up_down_num_statistics():
+def up_down_num_statistics(subdir):
     shindex_seq = []
     tmp = iohelper.read_pickle2list(subdir, 'shindex_seq')
     if len(tmp) == 50:
@@ -117,7 +131,7 @@ def normalization_zero_mean(datalist):
     D = pd.Series(datalist)
     mean = D.mean()
     std = D.std()
-    print("mean and std " , mean, std)
+    print("before convert : mean and std " , mean, std)
     list_tmp = [(x - mean) / std for x in datalist]
     return list_tmp
 
@@ -150,7 +164,7 @@ def get_tick_time_series():
             break
     return tick_seq
 
-def plot_index_and_sentiment(tick_seq, shindex_seq, sentiment_seq):
+def plot_index_and_sentiment(tick_seq, shindex_seq, sentiment_seq, subdir):
     if len(tick_seq) != len(shindex_seq) or len(tick_seq) != len(sentiment_seq):
         print('error(plot) : three sequence length is not same')
         return
@@ -177,7 +191,9 @@ def plot_index_and_sentiment(tick_seq, shindex_seq, sentiment_seq):
     plt.xlabel("Time(5min)")
     plt.ylabel("Index Value")
     plt.legend()
-    plt.show()
+    # plt.show()
+    filepath = './Pic/' + subdir + '.png'
+    plt.savefig(filepath)
 
 if __name__ == '__main__':
     main()

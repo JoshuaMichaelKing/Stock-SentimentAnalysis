@@ -71,7 +71,7 @@ def sentiment_lexicon_compute():
     '20160418', '20160419', '20160420', '20160421',
     '20160425', '20160426', '20160427', '20160429']
     review_list_day.extend(date_of_april)
-    review_list_day = ['20160405']  # just for test : to be removed
+    # review_list_day = ['20160406']  # just for test : to be removed
 
     for subdir in review_list_day:
         tick_now = opentime1
@@ -197,8 +197,8 @@ def word_preprocessing(blog_corpus, subdir):
             tfidf = tf_idf(term, doc, new_blog_corpus)
             score_dict[term] = tfidf
         score_list = sorted(score_dict.iteritems(), key=lambda d:d[1], reverse = True)
-        if (len(score_list) >= 2):
-            for cur in range(2):
+        if (len(score_list) >= 3):
+            for cur in range(3):
                 word_tfidf_dict[score_list[cur][0]] = score_list[cur][1]
     word_tfidf_list = []
     # word_tfidf_list = sorted(word_tfidf_dict.iteritems(), key=lambda d:d[1], reverse = False)
@@ -227,13 +227,13 @@ def is_word_invalid(word):
         isfloat = False
     return isfloat
 
-def tf(term, doc, normalize=True):
+def __tf(term, doc, normalize=True):
 	if normalize:
 		return doc.count(term) / float(len(doc))
 	else:
 		return doc.count(term) / 1.0
 
-def idf(term, corpus):
+def __idf(term, corpus):
 	num_texts_with_term = len([True for text in corpus if term in text])
 	try:
 		return 1.0 + log(float(len(corpus)) / num_texts_with_term)
@@ -241,8 +241,8 @@ def idf(term, corpus):
 		return 1.0
 
 def tf_idf(term, doc, corpus):
-    tf_value = tf(term, doc)
-    idf_value = idf(term, corpus)
+    tf_value = __tf(term, doc)
+    idf_value = __idf(term, corpus)
     if tf_value == 0:
         return 0
     else:
