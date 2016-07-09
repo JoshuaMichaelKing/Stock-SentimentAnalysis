@@ -32,7 +32,7 @@ def main():
     '20160418', '20160419', '20160420', '20160421',
     '20160425', '20160426', '20160427', '20160429']
     review_list_day.extend(date_of_april)
-    review_list_day = ['20160406']  # just for test : to be removed
+    review_list_day = ['20160420']  # just for test : to be removed
 
     for day in review_list_day:
         print('------correlation date %s------' % day)
@@ -184,7 +184,11 @@ def plot_index_and_sentiment(tick_seq, shindex_seq, sentiment_seq, subdir):
     p1 = fig.add_subplot(111)
     p1.xaxis.set_major_formatter(FuncFormatter(format_fn))
     p1.xaxis.set_major_locator(MaxNLocator(integer=True, nbins=12))
-    p1.plot(x, y1, label="$SCI$", color="red", linewidth=1)
+    delta = shindex_seq[len(shindex_seq) - 1] - shindex_seq[0]
+    if delta > 0:
+        p1.plot(x, y1, label="$SCI$", color="red", linewidth=1)
+    else:
+        p1.plot(x, y1, label="$SCI$", color="green", linewidth=1)
     p1.plot(x, y2, 'b--', label="$ISI$", color="blue", linewidth=1)
 
     plt.title("Shanghai Composite Index(SCI) & Investor Sentiment Index(ISI)")
