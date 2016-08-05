@@ -32,7 +32,7 @@ def main():
     '20160418', '20160419', '20160420', '20160421',
     '20160425', '20160426', '20160427', '20160429']
     review_list_day.extend(date_of_april)
-    review_list_day = ['20160420']  # just for test : to be removed
+    review_list_day = ['20160405']  # just for test : to be removed
 
     for day in review_list_day:
         print('------correlation date %s------' % day)

@@ -63,7 +63,7 @@ def sentiment_lexicon_compute():
     tick_delta = dt.timedelta(minutes=5)
 
     status = raw_input("Construct dictionary or compute sentiment index? Please input yes(feature extraction) or no(compute sentiment index)!")
-    isPrint = False
+    isPrint = False  # use the flag to print the word score in sentiment computing
 
     review_list_day = []
     date_of_april = ['20160405', '20160406', '20160407', '20160408',
@@ -71,7 +71,7 @@ def sentiment_lexicon_compute():
     '20160418', '20160419', '20160420', '20160421',
     '20160425', '20160426', '20160427', '20160429']
     review_list_day.extend(date_of_april)
-    # review_list_day = ['20160406']  # just for test : to be removed
+    review_list_day = ['20160405']  # just for test : to be removed
 
     for subdir in review_list_day:
         tick_now = opentime1
@@ -82,8 +82,8 @@ def sentiment_lexicon_compute():
             if (tick_now >= opentime1 and tick_now <= midclose) or (tick_now >= opentime2 and tick_now <= closetime):
                 hour = tick_now.hour
                 minute = tick_now.minute
-                if hour == 13 and minute == 45:
-                    isPrint = False  # use the flag to print the word score in sentiment computing
+                if hour == 13 and minute == 50:
+                    isPrint = True
                 else:
                     isPrint = False
                 fname = str(hour * 100 + minute)
