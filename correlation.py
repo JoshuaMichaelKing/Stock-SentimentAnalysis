@@ -27,12 +27,12 @@ Python Investor Sentiment Index and Shanghai Composite Index Correlation Analysi
 
 def main():
     review_list_day = []
-    date_of_april = ['20160405', '20160406', '20160407', '20160408',
-    '20160411', '20160412', '20160413', '20160414', '20160415',
-    '20160418', '20160419', '20160420', '20160421',
-    '20160425', '20160426', '20160427', '20160429']
-    review_list_day.extend(date_of_april)
-    review_list_day = ['20160405']  # just for test : to be removed
+    # june = 10 (after set the classifier, use its result to make correlation analysis)
+    date_of_june = ['20160601', '20160602', '20160606',
+    '20160613', '20160614', '20160615',
+    '20160620', '20160622', '20160624', '20160628']
+    review_list_day.extend(date_of_june)
+    # review_list_day = ['20160601']  # just for test : to be removed
 
     for day in review_list_day:
         print('------correlation date %s------' % day)

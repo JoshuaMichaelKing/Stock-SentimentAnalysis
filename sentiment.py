@@ -25,11 +25,21 @@ Python : Feature Extraction and Sentiment Index Computing.
 def main():
     FILE = os.curdir
     logging.basicConfig(filename=os.path.join(FILE, 'log.txt'), level=logging.ERROR)
-    sentiment_lexicon_compute()
+    bool_method = raw_input("Using Machine Learning or Sentiment Lexicon method? Please input 1(machine learning) or 2(sentiment lexicon)!")
+    if bool_method is '1':
+        print('------------------------Machine Learning------------------------')
+        sentiment_ml_compute()
+    elif bool_method is '2':
+        print('------------------------Sentiment Lexicon------------------------')
+        sentiment_lexicon_compute()
 
+# Machine Learning
 def sentiment_ml_compute():
     pass
 
+# -----------------------------------------------------------------------------
+
+# Sentiment Lexicon
 def sentiment_lexicon_compute():
     '''
     1. select the words to construct dictionary
@@ -62,16 +72,26 @@ def sentiment_lexicon_compute():
 
     tick_delta = dt.timedelta(minutes=5)
 
-    status = raw_input("Construct dictionary or compute sentiment index? Please input yes(feature extraction) or no(compute sentiment index)!")
+    status = raw_input("Construct dictionary or compute sentiment index? Please input yes(lexicon construction) or no(compute sentiment index)!")
     isPrint = False  # use the flag to print the word score in sentiment computing
 
     review_list_day = []
+    date_of_march = ['20160329', '20160331']
     date_of_april = ['20160405', '20160406', '20160407', '20160408',
     '20160411', '20160412', '20160413', '20160414', '20160415',
     '20160418', '20160419', '20160420', '20160421',
     '20160425', '20160426', '20160427', '20160429']
-    review_list_day.extend(date_of_april)
-    review_list_day = ['20160405']  # just for test : to be removed
+    date_of_may = ['20160503', '20160504', '20160505', '20160506',
+    '20160509', '20160510', '20160511', '20160512', '20160513',
+    '20160516', '20160517', '20160518', '20160519', '20160520',
+    '20160523', '20160524', '20160525', '20160526', '20160527',
+    '20160530', '20160531']
+
+    # june = 10 (compute 10 days sentiment index to make correlation analysis)
+    date_of_june = ['20160601', '20160602', '20160606',
+    '20160613', '20160614', '20160615',
+    '20160620', '20160622', '20160624', '20160628']
+    review_list_day.extend(date_of_june) # just for test by month
 
     for subdir in review_list_day:
         tick_now = opentime1

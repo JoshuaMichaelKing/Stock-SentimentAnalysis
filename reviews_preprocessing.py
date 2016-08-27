@@ -5,6 +5,7 @@ from __future__ import print_function
 from __future__ import division
 import os, sys, codecs, logging, pickle
 import jieba
+import random
 from math import log
 import datetime as dt
 
@@ -26,13 +27,18 @@ def main():
     FILE = os.curdir
     logging.basicConfig(filename=os.path.join(FILE,'log.txt'), level=logging.ERROR)
     pos_neg_cut_test()
+    # pos_or_neg_reviews2pkl()
+
+# read from file neg_reviews and pos_reviews and save it to pickle
+def pos_or_neg_reviews2pkl():
+    pass
 
 def pos_neg_cut_test():
     '''
     based on the constructed stock-oriented lexicon, initially seperate the whole reviews into pwo part automatically : pos and neg
     then adjust it manually
     '''
-    # loading postive and negtive sentiment lexicon
+    # loading positive and negative sentiment lexicon
     pos_lexicon_dict = {}
     neg_lexicon_dict = {}
     lexicon = iohelper.read_lexicon2dict('positive.txt', True)
@@ -49,6 +55,8 @@ def pos_neg_cut_test():
     lexicon = iohelper.read_lexicon2dict('ntusd-negative.txt')
     neg_lexicon_dict = dict(neg_lexicon_dict, **lexicon)
 
+    # march + april + may = 40 (40*50=2000, 200 as test 1800 as train)
+    date_of_march = ['20160329', '20160331']
     date_of_april = ['20160405', '20160406', '20160407', '20160408',
     '20160411', '20160412', '20160413', '20160414', '20160415',
     '20160418', '20160419', '20160420', '20160421',
@@ -58,14 +66,13 @@ def pos_neg_cut_test():
     '20160516', '20160517', '20160518', '20160519', '20160520',
     '20160523', '20160524', '20160525', '20160526', '20160527',
     '20160530', '20160531']
-    date_of_june = ['20160601', '20160602', '20160606',
-    '20160613', '20160614', '20160615',
-    '20160620', '20160622', '20160624', '20160628']
+
+    review_list_day = []
+    review_list_day.extend(date_of_march)
     review_list_day.extend(date_of_april)
     review_list_day.extend(date_of_may)
-    review_list_day.extend(date_of_june)
-    review_list_day = ['20160405']  # just for test : to be removed
 
+    review_list_day = ['20160329']  # just for test one day : correct pos_reviews and neg_reviews manually
     pos_scores = []
     neg_scores = []
     mid_scores = []
@@ -119,8 +126,10 @@ def pos_neg_cut_test():
         filepath = './Data/' + subdir + '/new_wordList.txt'
         iohelper.save_list2file(new_word_list, filepath)
         print('save_list2file new word[mid polarity] list successfully!')
-    iohelper.save_list2file(neg_reviews, './Data/neg_reviews.txt')
-    iohelper.save_list2file(pos_reviews, './Data/pos_reviews.txt')
+    neg_reviews = random.sample(neg_reviews, 50)
+    pos_reviews = random.sample(pos_reviews, 50)
+    iohelper.save_list2file(neg_reviews, './Data/neg_reviews.tmp')
+    iohelper.save_list2file(pos_reviews, './Data/pos_reviews.tmp')
     print('{0}-{1}-{2}'.format(len(neg_scores), len(mid_scores), len(pos_scores)))
 
 def sentiment_logarithm_estimation(pos_lexicon_dict, neg_lexicon_dict, sentence_blog_segments):
