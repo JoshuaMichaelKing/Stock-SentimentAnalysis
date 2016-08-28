@@ -8,7 +8,8 @@
 
 ### reviews preprocessing
 - reviews_preprocessing.py is to seperate all the reviews into two part : positive and negative part(with some handful work)
-- use the seperated reviews to implement machine learning classifier
+- using the seperated reviews to implement machine learning classifier(Logistic Regression, Naive Bayes and Support Vector Machine)
+- using the package nltk and scikit-learn to implement machine learning method
 
 ### sentiment index computing
 - sentiment.py is to compute index from Data/20160000/****.txt and save list to pickle(saindex_seq.pkl), list contains every 5 minutes sentiment index
