@@ -72,13 +72,7 @@ def pos_neg_cut_test():
     review_list_day.extend(date_of_april)
     review_list_day.extend(date_of_may)
 
-    review_list_day = ['20160329']  # just for test one day : correct pos_reviews and neg_reviews manually
-    pos_scores = []
-    neg_scores = []
-    mid_scores = []
-    new_word_list = []
-    pos_reviews = []
-    neg_reviews = []
+    # review_list_day = ['20160407']  # just for test one day : correct pos_reviews and neg_reviews manually
     print('{0}   {1}'.format(len(review_list_day), review_list_day))
 
     opentime1 = st.opentime1
@@ -90,7 +84,12 @@ def pos_neg_cut_test():
     for subdir in review_list_day:
         tick_now = opentime1
         count = 0
-        new_word_list = []
+        pos_reviews = []
+        mid_reviews = []
+        neg_reviews = []
+        pos_scores = []
+        neg_scores = []
+        mid_scores = []
         while True:
             if (tick_now >= opentime1 and tick_now <= midclose) or (tick_now >= opentime2 and tick_now <= closetime):
                 hour = tick_now.hour
@@ -110,7 +109,7 @@ def pos_neg_cut_test():
                         result = sentiment_logarithm_estimation(pos_lexicon_dict, neg_lexicon_dict, tmp)
                         if result == 0:
                             mid_scores.append(result)
-                            new_word_list.append(each_blog)
+                            mid_reviews.append(each_blog)
                         elif result < 0:
                             neg_scores.append(result)
                             neg_reviews.append(each_blog)
@@ -123,14 +122,14 @@ def pos_neg_cut_test():
             elif tick_now > closetime:
                 break
         print('{0}-{1}'.format(subdir, count))
-        filepath = './Data/' + subdir + '/new_wordList.txt'
-        iohelper.save_list2file(new_word_list, filepath)
+        mid_reviews = random.sample(mid_reviews, 200)
+        iohelper.save_list2file(mid_reviews, './Data/' + subdir + '_mid_reviews')
         print('save_list2file new word[mid polarity] list successfully!')
-    neg_reviews = random.sample(neg_reviews, 50)
-    pos_reviews = random.sample(pos_reviews, 50)
-    iohelper.save_list2file(neg_reviews, './Data/neg_reviews.tmp')
-    iohelper.save_list2file(pos_reviews, './Data/pos_reviews.tmp')
-    print('{0}-{1}-{2}'.format(len(neg_scores), len(mid_scores), len(pos_scores)))
+        neg_reviews = random.sample(neg_reviews, 80)
+        pos_reviews = random.sample(pos_reviews, 80)
+        iohelper.save_list2file(neg_reviews, './Data/' + subdir + '_neg_reviews')
+        iohelper.save_list2file(pos_reviews, './Data/' + subdir + '_pos_reviews')
+        print('{0}-{1}-{2}'.format(len(neg_scores), len(mid_scores), len(pos_scores)))
 
 def sentiment_logarithm_estimation(pos_lexicon_dict, neg_lexicon_dict, sentence_blog_segments):
     '''
