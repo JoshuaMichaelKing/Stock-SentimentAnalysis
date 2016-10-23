@@ -60,6 +60,25 @@ def read_txt2list(fname, subdir=None):
     readfile.close()
     return bloglist
 
+def read_file2list(type):
+    '''
+    type : pos or neg
+    read reviews to save it to pickle
+    '''
+    rev_list = []
+    filepath = ''
+    if type is 'pos':
+        filepath = './Reviews/pos_reviews'
+    else:
+        filepath = './Reviews/neg_reviews'
+    readfile = codecs.open(filepath, 'r', 'utf-8')
+    output = readfile.readlines()  # 对于小文件可以一下全部读出
+    for cmt in output:
+        cmt = cmt.replace('\n', '')
+        rev_list.append(cmt)
+    readfile.close()
+    return rev_list
+
 def save_list2file(sentence_list, filefullpath):
     '''
     save list to txt, add \n to every list member's end

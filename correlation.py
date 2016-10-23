@@ -3,7 +3,7 @@
 
 from __future__ import print_function
 from __future__ import division
-import os, sys, pickle
+import os, sys
 import datetime as dt
 from math import sqrt
 import numpy as np
@@ -32,20 +32,29 @@ def main():
     '20160613', '20160614', '20160615',
     '20160620', '20160622', '20160624', '20160628']
     review_list_day.extend(date_of_june)
-    # review_list_day = ['20160601']  # just for test : to be removed
+    # review_list_day = ['20160628']  # just for test : to be removed
 
-    for day in review_list_day:
-        print('------correlation date %s------' % day)
-        correlation_analysis(day)
+    up_down_cnt = 0
+    cov_cnt = 0
+    for subdir in review_list_day:
+        print('------correlation date %s------' % subdir)
+        num, coef = correlation_analysis(subdir)
+        up_down_cnt += num
+        cov_cnt += abs(coef)
         print()
+    up_down_cnt /= len(review_list_day)
+    cov_cnt /= len(review_list_day)
+    print('>>>Average UPDOWN NUM PERCENTAGE:%f --- CORR COEF:%f', ((up_down_cnt / 48) * 100, cov_cnt))
 
+# -----------------------------------------------------------------------------
 def correlation_analysis(subdir):
     '''
     correlating shindex_seq with saindex_seq
+    return:multi-value(num, coef)
     '''
 
     # Analysis 1 : up down statistics
-    up_down_num_statistics(subdir)
+    num = up_down_num_statistics(subdir)
 
     # Analysis 2 : seq_process - index sum sequence
     shindex_seq = iohelper.read_pickle2list(subdir, 'shindex_seq')  # shanghai composite index sequence
@@ -87,8 +96,10 @@ def correlation_analysis(subdir):
     print('sa day index : %s %d' % (saindex_seq, len(saindex_seq)))
     print('ti day index : %s %d' % (tick_seq, len(tick_seq)))
 
-    print(pearson_corr(shindex_seq, saindex_seq))
+    coef = pearson_corr(shindex_seq, saindex_seq)
+    print(coef)
     plot_index_and_sentiment(tick_seq, shindex_seq, saindex_seq, subdir)
+    return num, coef
 
 def up_down_num_statistics(subdir):
     shindex_seq = []
@@ -114,6 +125,7 @@ def up_down_num_statistics(subdir):
         if (shindex_seq[i] > 0 and saindex_seq[i] > 0) or (shindex_seq[i] < 0 and saindex_seq[i] < 0) or (shindex_seq[i] == 0 and saindex_seq[i] == 0):
             count += 1
     print('up down common numbers : %d' % count)
+    return count
 
 def normalization_min_max(datalist):
     '''

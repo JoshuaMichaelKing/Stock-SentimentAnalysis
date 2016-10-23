@@ -3,7 +3,7 @@
 
 from __future__ import print_function
 from __future__ import division
-import os, sys, codecs, logging, pickle
+import os, sys, codecs, logging
 import jieba
 import random
 from math import log
@@ -29,14 +29,9 @@ def main():
     pos_neg_cut_test()
     # pos_or_neg_reviews2pkl()
 
-# read from file neg_reviews and pos_reviews and save it to pickle
-def pos_or_neg_reviews2pkl():
-    pass
-
 def pos_neg_cut_test():
     '''
-    based on the constructed stock-oriented lexicon, initially seperate the whole reviews into pwo part automatically : pos and neg
-    then adjust it manually
+    Based on the initial constructed stock-oriented lexicon, then seperate the whole reviews into pwo part automatically : pos and neg
     '''
     # loading positive and negative sentiment lexicon
     pos_lexicon_dict = {}
@@ -72,7 +67,7 @@ def pos_neg_cut_test():
     review_list_day.extend(date_of_april)
     review_list_day.extend(date_of_may)
 
-    # review_list_day = ['20160407']  # just for test one day : correct pos_reviews and neg_reviews manually
+    review_list_day = ['20160329']  # just for test one day : correct pos_reviews and neg_reviews manually
     print('{0}   {1}'.format(len(review_list_day), review_list_day))
 
     opentime1 = st.opentime1
@@ -133,7 +128,7 @@ def pos_neg_cut_test():
 
 def sentiment_logarithm_estimation(pos_lexicon_dict, neg_lexicon_dict, sentence_blog_segments):
     '''
-    using ln((1+pos)/(1+neg)) formula
+    using ln((1+sigma(pos))/(1+sigma(neg))) formula
     return float : sentiment value
     '''
     pos_list = []

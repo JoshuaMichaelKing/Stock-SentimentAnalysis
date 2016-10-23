@@ -3,7 +3,7 @@
 
 from __future__ import print_function
 from __future__ import division
-import os, sys, codecs, logging, pickle
+import os, sys, codecs, logging
 import jieba
 from math import log
 import datetime as dt
@@ -19,32 +19,14 @@ __license__ = 'MIT'
 __author__ = 'Joshua Guo (1992gq@gmail.com)'
 
 '''
-Python : Feature Extraction and Sentiment Index Computing.
+Python : Feature Selection and Sentiment Index Computing.
 '''
 
 def main():
     FILE = os.curdir
     logging.basicConfig(filename=os.path.join(FILE, 'log.txt'), level=logging.ERROR)
-    bool_method = raw_input("Using Machine Learning or Sentiment Lexicon method? Please input 1(machine learning) or 2(sentiment lexicon)!")
-    if bool_method is '1':
-        print('------------------------Machine Learning------------------------')
-        sentiment_ml_compute()
-    elif bool_method is '2':
-        print('------------------------Sentiment Lexicon------------------------')
-        sentiment_lexicon_compute()
+    bool_method = raw_input("Select Sentiment Lexicon Computing(1) or Classifier Comparison(2)? Please input 1 or 2!")
 
-# Machine Learning
-def sentiment_ml_compute():
-    pass
-
-# -----------------------------------------------------------------------------
-
-# Sentiment Lexicon
-def sentiment_lexicon_compute():
-    '''
-    1. select the words to construct dictionary
-    2. compute sentiment index according to the stock-oriented dictionary
-    '''
     # loading postive and negtive sentiment lexicon
     pos_lexicon_dict = {}
     neg_lexicon_dict = {}
@@ -65,15 +47,97 @@ def sentiment_lexicon_compute():
     print('pos_lexicon_dict length : %d' % len(pos_lexicon_dict))
     print('neg_lexicon_dict length : %d' % len(neg_lexicon_dict))
 
+    if bool_method is '1':
+        print('------------------------Sentiment Lexicon------------------------')
+        sentiment_lexicon_compute(pos_lexicon_dict, neg_lexicon_dict)
+    elif bool_method is '2':
+        print('------------------------Classifier Comparison------------------------')
+        sentiment_ml_fit()
+        neg_list = iohelper.read_file2list('neg')
+        pos_list = iohelper.read_file2list('pos')
+        sentiment_lexicon_precision(pos_lexicon_dict, neg_lexicon_dict, neg_list, pos_list)
+
+# -----------------------------------------------------------------------------
+def sentiment_lexicon_precision(pos_lexicon_dict, neg_lexicon_dict, neg_list, pos_list):
+    '''
+    Sentiment Lexicon Score
+    '''
+    if type(neg_list) is not type([]):
+        raise TypeError("There is a type error","first input neg should be list!")
+    if type(pos_list) is not type([]):
+        raise TypeError("There is a type error","second input pos should be list!")
+
+    neg_tk_lst = word_tokenization(neg_list)
+    pos_tk_lst = word_tokenization(pos_list)    # segmentation : [[,], [,], ...]
+    print('>>>Length Negative:%d --- Postive:%d', (len(neg_list), len(pos_list)))
+
+    # Using logarithm
+    neg_count = 0
+    for blog_lst in neg_tk_lst:
+        score = sentiment_logarithm_estimation(pos_lexicon_dict, neg_lexicon_dict, blog_lst)
+        if score < 0:
+            neg_count += 1
+    pos_count = 0
+    for blog_lst in pos_tk_lst:
+        score = sentiment_logarithm_estimation(pos_lexicon_dict, neg_lexicon_dict, blog_lst)
+        if score > 0:
+            pos_count += 1
+    neg_pct = neg_count / len(neg_list)
+    pos_pct = pos_count / len(pos_list)
+    print('>>>Using logarithm-Precision Negative:%f  --- Positive:%f' % (neg_pct, pos_pct))
+
+# -----------------------------------------------------------------------------
+def sentiment_logarithm_estimation(pos_lexicon_dict, neg_lexicon_dict, sentence_blog_segments):
+    '''
+    compute every preprocessed sentence's sentiment index
+    using ln((1+sigma(pos))/(1+sigma(neg))) formula
+    return float : sentiment value
+    '''
+    pos_list = []
+    neg_list = []
+    tick_value_tmp = float(0)
+    pos_count = 0
+    neg_count = 0
+    for word in sentence_blog_segments:
+        if word in pos_lexicon_dict:
+            pos_count += pos_lexicon_dict[word]
+        elif word in neg_lexicon_dict:
+            neg_count += neg_lexicon_dict[word]
+    tick_value_tmp = log(float(1 + pos_count) / float(1 + neg_count))
+    return tick_value_tmp
+
+# -----------------------------------------------------------------------------
+def sentiment_ml_precision():
+    '''
+    TODO
+    Machine Learning Score
+    '''
+    pass
+
+# -----------------------------------------------------------------------------
+def sentiment_ml_fit():
+    '''
+    TODO
+    Machine Learning Supervised to Fit
+    '''
+    pass
+
+# -----------------------------------------------------------------------------
+def sentiment_lexicon_compute(pos_lexicon_dict, neg_lexicon_dict):
+    '''
+    1. select the words to construct dictionary
+    2. compute sentiment index according to the stock-oriented dictionary
+    '''
+
     opentime1 = st.opentime1
     midclose = st.midclose
     opentime2 = st.opentime2
     closetime = st.closetime
-
     tick_delta = dt.timedelta(minutes=5)
 
     status = raw_input("Construct dictionary or compute sentiment index? Please input yes(lexicon construction) or no(compute sentiment index)!")
     isPrint = False  # use the flag to print the word score in sentiment computing
+    log_or_not = raw_input("Using logarithm(yes) or not(no)? Please input yes or no!")
 
     review_list_day = []
     date_of_march = ['20160329', '20160331']
@@ -92,45 +156,52 @@ def sentiment_lexicon_compute():
     '20160613', '20160614', '20160615',
     '20160620', '20160622', '20160624', '20160628']
     review_list_day.extend(date_of_june) # just for test by month
+    # review_list_day = ['20160602']
 
     for subdir in review_list_day:
         tick_now = opentime1
         blog_corpus = []
         sentiment_index = []
-        print('The date to be handled : {0}'.format(subdir))
+        print('>>>The date to be handled : {0}'.format(subdir))
         while True:
             if (tick_now >= opentime1 and tick_now <= midclose) or (tick_now >= opentime2 and tick_now <= closetime):
                 hour = tick_now.hour
                 minute = tick_now.minute
-                if hour == 13 and minute == 50:
+                if hour is 13 and minute is 0:
                     isPrint = True
                 else:
                     isPrint = False
                 fname = str(hour * 100 + minute)
-                tick_blog_list = word_tokenization(fname, subdir)   # convert 5-min reviews to blog list lisk this : [[,], [,],...]
+                blog_five_min_list = iohelper.read_txt2list(fname, subdir)
+                tick_blog_list = word_tokenization(blog_five_min_list)   # convert 5-min reviews to blog list lisk this : [[,], [,],...]
                 blog_corpus.extend(tick_blog_list)
                 tick_now += tick_delta
                 # Compute Sentiment Index
-                if status != 'yes':
-                    tick_value_tmp = sentiment_compute_logarithm(pos_lexicon_dict, neg_lexicon_dict, tick_blog_list, isPrint)
-                    sentiment_index.append(tick_value_tmp)
+                if status is not 'yes':
+                    score_tmp = 0
+                    if log_or_not is 'yes':
+                        score_tmp = sentiment_compute_logarithm(pos_lexicon_dict, neg_lexicon_dict, tick_blog_list, isPrint)
+                    else:
+                        score_tmp = sentiment_compute_average(pos_lexicon_dict, neg_lexicon_dict, tick_blog_list, isPrint)
+                    sentiment_index.append(score_tmp)
             elif tick_now > midclose and tick_now < opentime2:
                 tick_now = opentime2
             elif tick_now > closetime:
                 break
         # not necessary if you have processed it to word_tfidf list txt pkl
-        if status == 'yes':
+        if status is 'yes':
             word_preprocessing(blog_corpus, subdir)
             print('%s : word selected from blog_corpus successfully!' % (subdir))
         else:
             iohelper.save_list2pickle(sentiment_index, subdir, 'saindex_seq')
             print('%s : save_list2pickle successfully! %d' % (subdir, len(sentiment_index)))
 
-    print('ending.....')
+    print('Ending.....')
 
-# obsolete
+# -----------------------------------------------------------------------------
 def sentiment_compute_average(pos_lexicon_dict, neg_lexicon_dict, tick_blog_segments, isPrint):
     '''
+    <<<obsolete method>>>
     basic plus for positive and minus for negative to compute index average
     '''
     index_list = []
@@ -153,14 +224,16 @@ def sentiment_compute_average(pos_lexicon_dict, neg_lexicon_dict, tick_blog_segm
                     print("%s - %d" % (word, neg_lexicon_dict[word]))
                 sentence_count -= neg_lexicon_dict[word]
         index_list.append(sentence_count)
-    if len(index_list) != 0:
+    if len(index_list) is not 0:
         tick_value_tmp = sum(index_list) / float(len(index_list))
-    print('%f' % tick_value_tmp)
+    if isPrint:
+        print('%f' % tick_value_tmp)
     return tick_value_tmp
 
+# -----------------------------------------------------------------------------
 def sentiment_compute_logarithm(pos_lexicon_dict, neg_lexicon_dict, tick_blog_segments, isPrint = False):
     '''
-    using ln((1+pos)/(1+neg)) formula
+    using ln((1+sigma[pos])/(1+sigma[neg])) formula
     '''
     pos_list = []
     neg_list = []
@@ -177,18 +250,20 @@ def sentiment_compute_logarithm(pos_lexicon_dict, neg_lexicon_dict, tick_blog_se
         for word in doc_tmp:
             if word in pos_lexicon_dict:
                 if isPrint:
-                    print("%s + %d" % (word, pos_lexicon_dict[word]))
+                    print(">>>%s + %d" % (word, pos_lexicon_dict[word]))
                 pos_count += pos_lexicon_dict[word]
             elif word in neg_lexicon_dict:
                 if isPrint:
-                    print("%s - %d" % (word, neg_lexicon_dict[word]))
+                    print(">>>%s - %d" % (word, neg_lexicon_dict[word]))
                 neg_count += neg_lexicon_dict[word]
         pos_list.append(pos_count)
         neg_list.append(neg_count)
     tick_value_tmp = log(float(1 + sum(pos_list)) / float(1 + sum(neg_list)))
-    print('%f' % tick_value_tmp)
+    if isPrint:
+        print('>>>%f' % tick_value_tmp)
     return tick_value_tmp
 
+# -----------------------------------------------------------------------------
 def word_preprocessing(blog_corpus, subdir):
     '''
     blog_corpus : [["", ""], ["", ""], ["", ""]], new_blog_corpus is the filtered one
@@ -232,6 +307,7 @@ def word_preprocessing(blog_corpus, subdir):
     iohelper.save_list2txt(word_tfidf_list, subdir, 'wordTFDict')
     print('word_preprocessing-save word_list_tfidf success!')
 
+# -----------------------------------------------------------------------------
 def is_word_invalid(word):
     '''
     to judge the word is or not the chinese, if not return False, else return True.
@@ -247,6 +323,7 @@ def is_word_invalid(word):
         isfloat = False
     return isfloat
 
+# -----------------------------------------------------------------------------
 def __tf(term, doc, normalize=True):
 	if normalize:
 		return doc.count(term) / float(len(doc))
@@ -268,10 +345,12 @@ def tf_idf(term, doc, corpus):
     else:
         return tf_value * idf_value
 
+# -----------------------------------------------------------------------------
 def bag_of_words(words):
     return dict([(word, True) for word in words])
 
-def word_tokenization(fname, subdir=None):
+# -----------------------------------------------------------------------------
+def word_tokenization(tick_blog_list):
     '''
     word tokenization by jieba to list
     return list : [[,], [,], ...]
@@ -279,7 +358,6 @@ def word_tokenization(fname, subdir=None):
     count = 0
     seg_list = []
     try:
-        tick_blog_list = iohelper.read_txt2list(fname, subdir)
         for blog in tick_blog_list:
             if blog != '':
                 count += 1
@@ -293,5 +371,6 @@ def word_tokenization(fname, subdir=None):
     finally:
         return seg_list
 
+# Python双击可以直接测试
 if __name__ == '__main__':
     main()

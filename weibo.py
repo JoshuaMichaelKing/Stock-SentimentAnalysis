@@ -7,7 +7,7 @@ from snspy import APIClient, SinaWeiboMixin      # using SinaWeibo
 from datetime import datetime
 import datetime as dt
 import stocktime as st
-import sys, os, time, pickle, json, logging, codecs
+import sys, os, time, json, logging, codecs
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
