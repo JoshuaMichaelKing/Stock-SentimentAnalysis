@@ -28,7 +28,7 @@ Python Investor Sentiment Index and Shanghai Composite Index Correlation Analysi
 def main():
     review_list_day = []
     # june = 10 (after set the classifier, use its result to make correlation analysis)
-    date_of_june = ['20160601', '20160602', '20160606',
+    date_of_june = ['20160606',
     '20160613', '20160614', '20160615',
     '20160620', '20160622', '20160624', '20160628']
     review_list_day.extend(date_of_june)
@@ -36,15 +36,16 @@ def main():
 
     up_down_cnt = 0
     cov_cnt = 0
+    length = 0
     for subdir in review_list_day:
         print('------correlation date %s------' % subdir)
-        num, coef = correlation_analysis(subdir)
+        num, coef, length = correlation_analysis(subdir)
         up_down_cnt += num
         cov_cnt += abs(coef)
         print()
     up_down_cnt /= len(review_list_day)
     cov_cnt /= len(review_list_day)
-    print('>>>Average UPDOWN NUM PERCENTAGE:%f --- CORR COEF:%f', ((up_down_cnt / 48) * 100, cov_cnt))
+    print('>>>Average UPDOWN NUM PERCENTAGE:%f --- CORR COEF:%f', ((up_down_cnt / length) * 100, cov_cnt))
 
 # -----------------------------------------------------------------------------
 def correlation_analysis(subdir):
@@ -88,9 +89,9 @@ def correlation_analysis(subdir):
     # shindex_seq = shindex_seq[1:47]  # two tick lag
     # saindex_seq = saindex_seq[0:46]  # two tick lag to show the sentiment
 
-    # tick_seq = tick_seq[2:47]        # three tick lag
-    # shindex_seq = shindex_seq[2:47]  # three tick lag
-    # saindex_seq = saindex_seq[0:45]  # three tick lag to show the sentiment
+    tick_seq = tick_seq[2:47]        # three tick lag
+    shindex_seq = shindex_seq[2:47]  # three tick lag
+    saindex_seq = saindex_seq[0:45]  # three tick lag to show the sentiment
 
     print('sh day index : %s %d' % (shindex_seq, len(shindex_seq)))
     print('sa day index : %s %d' % (saindex_seq, len(saindex_seq)))
@@ -99,7 +100,7 @@ def correlation_analysis(subdir):
     coef = pearson_corr(shindex_seq, saindex_seq)
     print(coef)
     plot_index_and_sentiment(tick_seq, shindex_seq, saindex_seq, subdir)
-    return num, coef
+    return num, coef, len(tick_seq)
 
 def up_down_num_statistics(subdir):
     shindex_seq = []
