@@ -26,9 +26,46 @@ Python : Reviews preprocessing.
 def main():
     FILE = os.curdir
     logging.basicConfig(filename=os.path.join(FILE,'log.txt'), level=logging.ERROR)
-    pos_neg_cut_test()
-    # pos_or_neg_reviews2pkl()
+    # pos_neg_cut_test()
+    pos_or_neg_reviews2pkl()
+    # read training corpus to list[[,...], [,...], ...]
+    # neg_tk_lst = iohelper.read_pickle2list('/Reviews/neg_reviews.pkl')
+    # pos_tk_lst = iohelper.read_pickle2list('/Reviews/pos_reviews.pkl')
 
+def pos_or_neg_reviews2pkl():
+    '''
+    convert the neg_reviews and pos_reviews to list[[,...], [,...],...]
+    save the list to pkl
+    '''
+    neg_list = iohelper.read_file2list('neg')
+    pos_list = iohelper.read_file2list('pos')
+    neg_tk_lst = word_tokenization(neg_list)
+    pos_tk_lst = word_tokenization(pos_list)    # segmentation : [[,], [,], ...]
+    iohelper.save_list2pickle(neg_tk_lst, './Reviews/neg_reviews.pkl')
+    iohelper.save_list2pickle(pos_tk_lst, './Reviews/pos_reviews.pkl')
+
+def word_tokenization(tick_blog_list):
+    '''
+    word tokenization by jieba to list
+    return list : [[,], [,], ...]
+    '''
+    count = 0
+    seg_list = []
+    try:
+        for blog in tick_blog_list:
+            if blog != '':
+                count += 1
+                segments = jieba.cut(blog)
+                tmp = []
+                for seg in segments:
+                    tmp.append(seg)
+                seg_list.append(tmp)
+    except IOError as e:
+        logging.error('IOError %s' % e)
+    finally:
+        return seg_list
+
+#-------------------------------------------------------------------------------
 def pos_neg_cut_test():
     '''
     Based on the initial constructed stock-oriented lexicon, then seperate the whole reviews into pwo part automatically : pos and neg

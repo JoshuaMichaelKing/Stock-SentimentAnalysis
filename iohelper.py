@@ -60,10 +60,11 @@ def read_txt2list(fname, subdir=None):
     readfile.close()
     return bloglist
 
+# reviews <---> list
 def read_file2list(type):
     '''
     type : pos or neg
-    read reviews to save it to pickle
+    read reviews to list
     '''
     rev_list = []
     filepath = ''
