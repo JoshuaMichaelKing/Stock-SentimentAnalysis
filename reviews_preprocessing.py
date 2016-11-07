@@ -27,10 +27,12 @@ def main():
     FILE = os.curdir
     logging.basicConfig(filename=os.path.join(FILE,'log.txt'), level=logging.ERROR)
     # pos_neg_cut_test()
-    pos_or_neg_reviews2pkl()
+    # pos_or_neg_reviews2pkl()
     # read training corpus to list[[,...], [,...], ...]
-    # neg_tk_lst = iohelper.read_pickle2list('/Reviews/neg_reviews.pkl')
-    # pos_tk_lst = iohelper.read_pickle2list('/Reviews/pos_reviews.pkl')
+    neg_tk_lst = iohelper.read_pickle2list('./Reviews/neg_reviews.pkl')
+    pos_tk_lst = iohelper.read_pickle2list('./Reviews/pos_reviews.pkl')
+    print(neg_tk_lst[0][0])
+    print(pos_tk_lst[0][0])
 
 def pos_or_neg_reviews2pkl():
     '''
