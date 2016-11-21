@@ -19,13 +19,12 @@ __license__ = 'MIT'
 __author__ = 'Joshua Guo (1992gq@gmail.com)'
 
 '''
-Python : Feature Selection and Sentiment Index Computing.
+Python : Using Sentiment-Lexicon to Implement Feature Selection and Sentiment Index Computing.
 '''
 
 def main():
     FILE = os.curdir
     logging.basicConfig(filename=os.path.join(FILE, 'log.txt'), level=logging.ERROR)
-    bool_method = raw_input("Select Sentiment Lexicon Computing(1) or Classifier Comparison(2)? Please input 1 or 2!")
 
     # loading postive and negtive sentiment lexicon
     pos_lexicon_dict = {}
@@ -47,80 +46,8 @@ def main():
     print('pos_lexicon_dict length : %d' % len(pos_lexicon_dict))
     print('neg_lexicon_dict length : %d' % len(neg_lexicon_dict))
 
-    if bool_method is '1':
-        print('------------------------Sentiment Lexicon------------------------')
-        sentiment_lexicon_compute(pos_lexicon_dict, neg_lexicon_dict)
-    elif bool_method is '2':
-        print('------------------------Classifier Comparison------------------------')
-        sentiment_ml_fit()
-        neg_list = iohelper.read_file2list('neg')
-        pos_list = iohelper.read_file2list('pos')
-        sentiment_lexicon_precision(pos_lexicon_dict, neg_lexicon_dict, neg_list, pos_list)
-
-# -----------------------------------------------------------------------------
-def sentiment_lexicon_precision(pos_lexicon_dict, neg_lexicon_dict, neg_list, pos_list):
-    '''
-    Sentiment Lexicon Score
-    '''
-    if type(neg_list) is not type([]):
-        raise TypeError("There is a type error","first input neg should be list!")
-    if type(pos_list) is not type([]):
-        raise TypeError("There is a type error","second input pos should be list!")
-
-    neg_tk_lst = word_tokenization(neg_list)
-    pos_tk_lst = word_tokenization(pos_list)    # segmentation : [[,], [,], ...]
-    print('>>>Length Negative:%d --- Postive:%d', (len(neg_list), len(pos_list)))
-
-    # Using logarithm
-    neg_count = 0
-    for blog_lst in neg_tk_lst:
-        score = sentiment_logarithm_estimation(pos_lexicon_dict, neg_lexicon_dict, blog_lst)
-        if score < 0:
-            neg_count += 1
-    pos_count = 0
-    for blog_lst in pos_tk_lst:
-        score = sentiment_logarithm_estimation(pos_lexicon_dict, neg_lexicon_dict, blog_lst)
-        if score > 0:
-            pos_count += 1
-    neg_pct = neg_count / len(neg_list)
-    pos_pct = pos_count / len(pos_list)
-    print('>>>Using logarithm-Precision Negative:%f  --- Positive:%f' % (neg_pct, pos_pct))
-
-# -----------------------------------------------------------------------------
-def sentiment_logarithm_estimation(pos_lexicon_dict, neg_lexicon_dict, sentence_blog_segments):
-    '''
-    compute every preprocessed sentence's sentiment index
-    using ln((1+sigma(pos))/(1+sigma(neg))) formula
-    return float : sentiment value
-    '''
-    pos_list = []
-    neg_list = []
-    tick_value_tmp = float(0)
-    pos_count = 0
-    neg_count = 0
-    for word in sentence_blog_segments:
-        if word in pos_lexicon_dict:
-            pos_count += pos_lexicon_dict[word]
-        elif word in neg_lexicon_dict:
-            neg_count += neg_lexicon_dict[word]
-    tick_value_tmp = log(float(1 + pos_count) / float(1 + neg_count))
-    return tick_value_tmp
-
-# -----------------------------------------------------------------------------
-def sentiment_ml_precision():
-    '''
-    TODO
-    Machine Learning Score
-    '''
-    pass
-
-# -----------------------------------------------------------------------------
-def sentiment_ml_fit():
-    '''
-    TODO
-    Machine Learning Supervised to Fit
-    '''
-    pass
+    print('---------------Sentiment Lexicon------------------')
+    sentiment_lexicon_compute(pos_lexicon_dict, neg_lexicon_dict)
 
 # -----------------------------------------------------------------------------
 def sentiment_lexicon_compute(pos_lexicon_dict, neg_lexicon_dict):
@@ -155,8 +82,11 @@ def sentiment_lexicon_compute(pos_lexicon_dict, neg_lexicon_dict):
     date_of_june = ['20160606',
     '20160613', '20160614', '20160615',
     '20160620', '20160622', '20160624', '20160628']
+    review_list_day.extend(date_of_march)
+    review_list_day.extend(date_of_april)
+    review_list_day.extend(date_of_may)
     review_list_day.extend(date_of_june) # just for test by month
-    # review_list_day = ['20160602']
+    # review_list_day = ['20160601']
 
     for subdir in review_list_day:
         tick_now = opentime1
@@ -167,7 +97,7 @@ def sentiment_lexicon_compute(pos_lexicon_dict, neg_lexicon_dict):
             if (tick_now >= opentime1 and tick_now <= midclose) or (tick_now >= opentime2 and tick_now <= closetime):
                 hour = tick_now.hour
                 minute = tick_now.minute
-                if hour is 13 and minute is 0:
+                if hour is 9 and minute is 35:
                     isPrint = True
                 else:
                     isPrint = False
@@ -177,9 +107,9 @@ def sentiment_lexicon_compute(pos_lexicon_dict, neg_lexicon_dict):
                 blog_corpus.extend(tick_blog_list)
                 tick_now += tick_delta
                 # Compute Sentiment Index
-                if status is not 'yes':
+                if status != 'yes':
                     score_tmp = 0
-                    if log_or_not is 'yes':
+                    if log_or_not == 'yes':
                         score_tmp = sentiment_compute_logarithm(pos_lexicon_dict, neg_lexicon_dict, tick_blog_list, isPrint)
                     else:
                         score_tmp = sentiment_compute_average(pos_lexicon_dict, neg_lexicon_dict, tick_blog_list, isPrint)
@@ -189,7 +119,7 @@ def sentiment_lexicon_compute(pos_lexicon_dict, neg_lexicon_dict):
             elif tick_now > closetime:
                 break
         # not necessary if you have processed it to word_tfidf list txt pkl
-        if status is 'yes':
+        if status == 'yes':
             word_preprocessing(blog_corpus, subdir)
             print('%s : word selected from blog_corpus successfully!' % (subdir))
         else:
@@ -226,8 +156,8 @@ def sentiment_compute_average(pos_lexicon_dict, neg_lexicon_dict, tick_blog_segm
         index_list.append(sentence_count)
     if len(index_list) is not 0:
         tick_value_tmp = sum(index_list) / float(len(index_list))
-    if isPrint:
-        print('%f' % tick_value_tmp)
+    # if isPrint:
+    print('average : %f' % tick_value_tmp)
     return tick_value_tmp
 
 # -----------------------------------------------------------------------------
@@ -249,18 +179,14 @@ def sentiment_compute_logarithm(pos_lexicon_dict, neg_lexicon_dict, tick_blog_se
                 doc_tmp.append(word)
         for word in doc_tmp:
             if word in pos_lexicon_dict:
-                if isPrint:
-                    print(">>>%s + %d" % (word, pos_lexicon_dict[word]))
                 pos_count += pos_lexicon_dict[word]
             elif word in neg_lexicon_dict:
-                if isPrint:
-                    print(">>>%s - %d" % (word, neg_lexicon_dict[word]))
                 neg_count += neg_lexicon_dict[word]
         pos_list.append(pos_count)
         neg_list.append(neg_count)
     tick_value_tmp = log(float(1 + sum(pos_list)) / float(1 + sum(neg_list)))
     if isPrint:
-        print('>>>%f' % tick_value_tmp)
+        print('FIRST-5-MIN Index : %f' % tick_value_tmp)
     return tick_value_tmp
 
 # -----------------------------------------------------------------------------
@@ -344,10 +270,6 @@ def tf_idf(term, doc, corpus):
         return 0
     else:
         return tf_value * idf_value
-
-# -----------------------------------------------------------------------------
-def bag_of_words(words):
-    return dict([(word, True) for word in words])
 
 # -----------------------------------------------------------------------------
 def word_tokenization(tick_blog_list):

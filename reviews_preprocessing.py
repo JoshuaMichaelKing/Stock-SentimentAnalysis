@@ -27,13 +27,13 @@ def main():
     FILE = os.curdir
     logging.basicConfig(filename=os.path.join(FILE,'log.txt'), level=logging.ERROR)
     # pos_neg_cut_test()
-    # pos_or_neg_reviews2pkl()
-    # read training corpus to list[[,...], [,...], ...]
-    neg_tk_lst = iohelper.read_pickle2list('./Reviews/neg_reviews.pkl')
-    pos_tk_lst = iohelper.read_pickle2list('./Reviews/pos_reviews.pkl')
-    print(neg_tk_lst[0][0])
-    print(pos_tk_lst[0][0])
 
+    # pos_or_neg_reviews2pkl()    # 将手动标注的积极消极评论集转换为pkl存储
+    # pos_tk_lst = iohelper.read_pickle2list('./Reviews/pos_reviews.pkl') # read training corpus to list[[,...], [,...], ...]
+    # neg_tk_lst = iohelper.read_pickle2list('./Reviews/neg_reviews.pkl') # same as above
+    # print('POS_REVIEWS_LENGTH %d\tNEG_REVIEWS_LENGTH %d' % (len(pos_tk_lst), len(neg_tk_lst)))
+
+#-------------------------------------------------------------------------------
 def pos_or_neg_reviews2pkl():
     '''
     convert the neg_reviews and pos_reviews to list[[,...], [,...],...]
@@ -55,13 +55,15 @@ def word_tokenization(tick_blog_list):
     seg_list = []
     try:
         for blog in tick_blog_list:
+            count += 1
             if blog != '':
-                count += 1
                 segments = jieba.cut(blog)
                 tmp = []
                 for seg in segments:
                     tmp.append(seg)
                 seg_list.append(tmp)
+            else:
+                print('Line%d is empty!' % cnt)
     except IOError as e:
         logging.error('IOError %s' % e)
     finally:
@@ -73,21 +75,7 @@ def pos_neg_cut_test():
     Based on the initial constructed stock-oriented lexicon, then seperate the whole reviews into pwo part automatically : pos and neg
     '''
     # loading positive and negative sentiment lexicon
-    pos_lexicon_dict = {}
-    neg_lexicon_dict = {}
-    lexicon = iohelper.read_lexicon2dict('positive.txt', True)
-    pos_lexicon_dict = dict(pos_lexicon_dict, **lexicon)
-    lexicon = iohelper.read_lexicon2dict('hownet-positive.txt')
-    pos_lexicon_dict = dict(pos_lexicon_dict, **lexicon)
-    lexicon = iohelper.read_lexicon2dict('ntusd-positive.txt')
-    pos_lexicon_dict = dict(pos_lexicon_dict, **lexicon)
-
-    lexicon = iohelper.read_lexicon2dict('negative.txt', True)
-    neg_lexicon_dict = dict(neg_lexicon_dict, **lexicon)
-    lexicon = iohelper.read_lexicon2dict('hownet-negative.txt')
-    neg_lexicon_dict = dict(neg_lexicon_dict, **lexicon)
-    lexicon = iohelper.read_lexicon2dict('ntusd-negative.txt')
-    neg_lexicon_dict = dict(neg_lexicon_dict, **lexicon)
+    pos_lexicon_dict, neg_lexicon_dict = load_sentiment_lexicon()
 
     # march + april + may = 40 (40*50=2000, 200 as test 1800 as train)
     date_of_march = ['20160329', '20160331']
@@ -106,7 +94,7 @@ def pos_neg_cut_test():
     review_list_day.extend(date_of_april)
     review_list_day.extend(date_of_may)
 
-    review_list_day = ['20160329']  # just for test one day : correct pos_reviews and neg_reviews manually
+    # review_list_day = ['20160329']  # just for test one day : correct pos_reviews and neg_reviews manually
     print('{0}   {1}'.format(len(review_list_day), review_list_day))
 
     opentime1 = st.opentime1
@@ -165,8 +153,33 @@ def pos_neg_cut_test():
         iohelper.save_list2file(pos_reviews, './Data/' + subdir + '_pos_reviews')
         print('{0}-{1}-{2}'.format(len(neg_scores), len(mid_scores), len(pos_scores)))
 
+# -----------------------------------------------------------------------------
+def load_sentiment_lexicon():
+    '''
+    载入情感词典
+    '''
+    # loading positive and negative sentiment lexicon
+    pos_lexicon_dict = {}
+    neg_lexicon_dict = {}
+    lexicon = iohelper.read_lexicon2dict('positive.txt', True)
+    pos_lexicon_dict = dict(pos_lexicon_dict, **lexicon)
+    lexicon = iohelper.read_lexicon2dict('hownet-positive.txt')
+    pos_lexicon_dict = dict(pos_lexicon_dict, **lexicon)
+    lexicon = iohelper.read_lexicon2dict('ntusd-positive.txt')
+    pos_lexicon_dict = dict(pos_lexicon_dict, **lexicon)
+
+    lexicon = iohelper.read_lexicon2dict('negative.txt', True)
+    neg_lexicon_dict = dict(neg_lexicon_dict, **lexicon)
+    lexicon = iohelper.read_lexicon2dict('hownet-negative.txt')
+    neg_lexicon_dict = dict(neg_lexicon_dict, **lexicon)
+    lexicon = iohelper.read_lexicon2dict('ntusd-negative.txt')
+    neg_lexicon_dict = dict(neg_lexicon_dict, **lexicon)
+
+    return pos_lexicon_dict, neg_lexicon_dict
+
 def sentiment_logarithm_estimation(pos_lexicon_dict, neg_lexicon_dict, sentence_blog_segments):
     '''
+    compute every preprocessed sentence's sentiment index
     using ln((1+sigma(pos))/(1+sigma(neg))) formula
     return float : sentiment value
     '''
