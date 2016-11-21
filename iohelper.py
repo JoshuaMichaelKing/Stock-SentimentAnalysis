@@ -26,7 +26,7 @@ def read_lexicon2dict(fname, isNew=False):
     read sentiment lexicon to dict
     '''
     lexicon_dict = {}
-    filepath = './Dictionary/' + fname
+    filepath = './Lexicons/' + fname
     readfile = codecs.open(filepath, 'r', 'utf-8')
     output = readfile.readlines()  # 对于小文件可以一下全部读出
     for line in output:
@@ -49,9 +49,9 @@ def read_txt2list(fname, subdir=None):
     bloglist = []
     filepath = ''
     if subdir is None:
-        filepath = './Data/' + fname + '.txt'
+        filepath = './Comments/' + fname + '.txt'
     else:
-        filepath = './Data/' + subdir + '/' + fname + '.txt'
+        filepath = './Comments/' + subdir + '/' + fname + '.txt'
     readfile = codecs.open(filepath, 'r', 'utf-8')
     output = readfile.readlines()  # 对于小文件可以一下全部读出
     for weibo in output:
@@ -89,16 +89,6 @@ def save_list2file(sentence_list, filefullpath):
         f.write(tp + '\n')
     f.close()
 
-def save_list2txt(word_list_tfidf, subdir, fname):
-    '''
-    save list(element:key-value) to txt, add \n to every list member's end
-    '''
-    filepath = './Data/' + subdir + '/' + fname + '.txt'
-    f = codecs.open(filepath, 'a', 'utf-8')
-    for tp in word_list_tfidf:
-        f.write(tp[0] + ':' + str(tp[1]) + '\n')
-    f.close()
-
 # pickle <--> list
 def read_pickle2list(fpath, fname=None):
     '''
@@ -108,7 +98,10 @@ def read_pickle2list(fpath, fname=None):
     if fname is None:
         output = open(fpath, 'rb')
     else:
-        output = open('./Data/' + fpath + '/' + fname + '.pkl', 'rb')
+        if fname.startswith('sh'):
+            output = open('./Stock Index/' + fpath + '/' + fname + '.pkl', 'rb')
+        elif fname.startswith('sa'):
+            output = open('./Stock Index/' + fpath + '/' + fname + '.pkl', 'rb')
     # Pickle dictionary using protocol 0.
     list_seq = pickle.load(output)
     output.close()
@@ -122,7 +115,7 @@ def save_list2pickle(word_list, fpath, fname=None):
     if fname is None:
         output = open(fpath, 'wb')
     else:
-        output = open('./Data/' + fpath + '/' + fname + '.pkl', 'wb')
+        output = open('./Comments/' + fpath + '/' + fname + '.pkl', 'wb')
 
     # Pickle dictionary using protocol 0.
     pickle.dump(word_list, output)

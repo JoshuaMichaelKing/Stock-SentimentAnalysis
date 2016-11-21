@@ -123,7 +123,7 @@ def sentiment_lexicon_compute(pos_lexicon_dict, neg_lexicon_dict):
             word_preprocessing(blog_corpus, subdir)
             print('%s : word selected from blog_corpus successfully!' % (subdir))
         else:
-            iohelper.save_list2pickle(sentiment_index, subdir, 'saindex_seq')
+            iohelper.save_list2pickle(sentiment_index, './Sentiment Index/' + subdir + '/saindex_seq')
             print('%s : save_list2pickle successfully! %d' % (subdir, len(sentiment_index)))
 
     print('Ending.....')
@@ -230,7 +230,6 @@ def word_preprocessing(blog_corpus, subdir):
         word_tfidf_list.append(tp)
     print('word_preprocessing-all new word number %d' % len(word_tfidf_list))
     iohelper.save_list2pickle(word_tfidf_list, subdir, 'wordTFDict')
-    iohelper.save_list2txt(word_tfidf_list, subdir, 'wordTFDict')
     print('word_preprocessing-save word_list_tfidf success!')
 
 # -----------------------------------------------------------------------------

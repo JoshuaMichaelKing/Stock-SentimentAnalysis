@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+a#!/usr/bin/env python2.7
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
@@ -81,11 +81,11 @@ def make_dir_if_not_exist(filepath):
     else:
         os.mkdir(str(filepath))
 
-def save_list2file_pickle(index_seq, dir):
+def save_list2file_pickle(index_seq, subdir):
     '''
     save stock sequence to file by pickle
     '''
-    filepath = './Data/' + dir
+    filepath = './Stock Index/' + subdir
     make_dir_if_not_exist(filepath)
     filepath = filepath + '/'
     output = open(filepath + 'shindex_seq.pkl', 'wb')
