@@ -15,7 +15,7 @@
 - using the hand-tag positive and negative reviews to implement machine learning classifier(Logistic Regression, Naive Bayes and Support Vector Machine)
 
 ### sentiment index computing(情感系数的计算)
-- sentiment.py is to compute index from Data/20160000/****.txt and save list to pickle(saindex_seq.pkl), list contains every 5 minutes sentiment index
+- sentiment.py is to compute index from Comments/20160000/****.txt and save list to pickle(saindex_seq.pkl), list contains every 5 minutes sentiment index
 
 ### correlation analysis(相关性分析)
 - correlation.py is to correlate the sequence of sentiment index and shanghai composite index at a specified day
@@ -24,10 +24,13 @@
 - use historical 5-min close index to predict next close index(multi-linear regression)
 - plus 5-min sentiment-index into multi-factor and predict again
 
-### other info(配置及文件信息)
+### other info(配置及文件夹信息)
 - config.ini is to write information(App Key, App Secret and Callback URL) to connect sina open api
-- Directory Dictionary is to save lexicon dict
+- Directory Comments is to save all the online comments from sina weibo
+- Directory Lexicons is to save lexicon dict
 - Directory Reviews is to save tagged positive and negtive comments.
+- Directory Sentiment Index is to save everyday 5-min sentiment index time Series
+- Directory Stock Index is to save everyday 5-min stock close index time series
 
 ### the classifying result(分类结果)
 - not use bigrams
