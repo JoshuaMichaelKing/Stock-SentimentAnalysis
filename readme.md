@@ -34,22 +34,22 @@
 
 ### The Classifying Result(分类结果)
 - not use bigrams
-The Lexicons's average precision recall accuracy score is repectively : 0.95 0.93 0.94
-The LR's average precision recall accuracy score is repectively : 0.91 0.90 0.90
-The BernoulliNB's average precision recall accuracy score is repectively : 0.87 0.82 0.85
-The MultinomialNB's average precision recall accuracy score is repectively : 0.87 0.80 0.84
-The LinearSVC's average precision recall accuracy score is repectively : 0.90 0.89 0.90
-The NuSVC's average precision recall accuracy score is repectively : 0.89 0.88 0.89
-The SVC's average precision recall accuracy score is repectively : 0.85 0.85 0.85
+- The Lexicons's average precision recall accuracy score is repectively : 0.95 0.93 0.94
+- The LR's average precision recall accuracy score is repectively : 0.91 0.90 0.90
+- The BernoulliNB's average precision recall accuracy score is repectively : 0.87 0.82 0.85
+- The MultinomialNB's average precision recall accuracy score is repectively : 0.87 0.80 0.84
+- The LinearSVC's average precision recall accuracy score is repectively : 0.90 0.89 0.90
+- The NuSVC's average precision recall accuracy score is repectively : 0.89 0.88 0.89
+- The SVC's average precision recall accuracy score is repectively : 0.85 0.85 0.85
 
 - use bigrams
-The Lexicon's average precision recall accuracy score is repectively : 0.95 0.93 0.94
-The LR's average precision recall accuracy score is repectively : 0.91 0.89 0.90
-The BernoulliNB's average precision recall accuracy score is repectively : 0.87 0.81 0.85
-The MultinomialNB's average precision recall accuracy score is repectively : 0.87 0.80 0.84
-The LinearSVC's average precision recall accuracy score is repectively : 0.89 0.88 0.89
-The NuSVC's average precision recall accuracy score is repectively : 0.90 0.88 0.89
-The SVC's average precision recall accuracy score is repectively : 0.85 0.85 0.85
+- The Lexicon's average precision recall accuracy score is repectively : 0.95 0.93 0.94
+- The LR's average precision recall accuracy score is repectively : 0.91 0.89 0.90
+- The BernoulliNB's average precision recall accuracy score is repectively : 0.87 0.81 0.85
+- The MultinomialNB's average precision recall accuracy score is repectively : 0.87 0.80 0.84
+- The LinearSVC's average precision recall accuracy score is repectively : 0.89 0.88 0.89
+- The NuSVC's average precision recall accuracy score is repectively : 0.90 0.88 0.89
+- The SVC's average precision recall accuracy score is repectively : 0.85 0.85 0.85
 
 ### The Prediction Result(预测结果)
 - contains historical data and plus sentiment index(based on lexicons and best-classifier:LR)
