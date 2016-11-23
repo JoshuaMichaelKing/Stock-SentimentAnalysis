@@ -54,8 +54,9 @@
 ### The Prediction Result(预测结果)
 - contains historical data and plus sentiment index(based on lexicons and best-classifier:LR)
 - from left to right, the metrics name respectively is : MA, RMSE, MAPE
+
 #### Historical Regression
-Test-Metrics :   0.970355  5.105886  0.001043
+- Test-Metrics :   0.970355  5.105886  0.001043
 
 #### Lexicons-POS
 - AVG_UP_DOWN_NUM:50.21%	COEF_AVG:0.55	COEF_MAX:0.89
