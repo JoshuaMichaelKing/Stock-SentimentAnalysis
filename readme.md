@@ -33,7 +33,7 @@
 - Directory Stock Index is to save everyday 5-min stock close index time series
 
 ### The Classifying Result(分类结果)
-- not use bigrams
+#### Not Using Bigrams
 - The Lexicons's average precision recall accuracy score is repectively : 0.95 0.93 0.94
 - The LR's average precision recall accuracy score is repectively : 0.91 0.90 0.90
 - The BernoulliNB's average precision recall accuracy score is repectively : 0.87 0.82 0.85
@@ -42,7 +42,7 @@
 - The NuSVC's average precision recall accuracy score is repectively : 0.89 0.88 0.89
 - The SVC's average precision recall accuracy score is repectively : 0.85 0.85 0.85
 
-- use bigrams
+#### Using Bigrams
 - The Lexicon's average precision recall accuracy score is repectively : 0.95 0.93 0.94
 - The LR's average precision recall accuracy score is repectively : 0.91 0.89 0.90
 - The BernoulliNB's average precision recall accuracy score is repectively : 0.87 0.81 0.85
