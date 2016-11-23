@@ -11,7 +11,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter, MaxNLocator
 
-import iohelper
+import iohelper,sentiment
 import stocktime as st
 
 reload(sys)
@@ -25,46 +25,60 @@ __author__ = 'Joshua Guo (1992gq@gmail.com)'
 Python Investor Sentiment Index and Shanghai Composite Index Correlation Analysis.
 '''
 
+subdir = 'Lexicons'
+
 def main():
+    global subdir
+    subdir = sentiment.g_classifier_name
+    if subdir.endswith('LR'):
+        subdir = 'LR'
+    elif subdir.endswith('NB'):
+        subdir = 'NB'
+    elif subdir.endswith('SVC'):
+        subdir = 'SVM'
+    else:
+        subdir = 'Lexicons'
+    print('------------------%s-------------------' % (subdir))
     review_list_day = []
     # june = 10 (after set the classifier, use its result to make correlation analysis)
-    date_of_june = ['20160606',
-    '20160613', '20160614', '20160615',
-    '20160620', '20160622', '20160624', '20160628']
+    date_of_june = ['20160601', '20160602', '20160606', '20160613',
+    '20160614', '20160615', '20160620', '20160622', '20160624', '20160628']
     review_list_day.extend(date_of_june)
     # review_list_day = ['20160628']  # just for test : to be removed
 
     up_down_cnt = 0
     cov_cnt = 0
     length = 0
-    for subdir in review_list_day:
-        print('------correlation date %s------' % subdir)
-        num, coef, length = correlation_analysis(subdir)
+    coef_max = -100
+    for date in review_list_day:
+        print('>>>correlation date : %s' % date)
+        num, coef, length = correlation_analysis(date)
         up_down_cnt += num
         cov_cnt += abs(coef)
-        print()
+        if coef > coef_max:
+            coef_max = abs(coef)
     up_down_cnt /= len(review_list_day)
     cov_cnt /= len(review_list_day)
-    print('>>>Average UPDOWN NUM PERCENTAGE:%f --- CORR COEF:%f', ((up_down_cnt / length) * 100, cov_cnt))
+    print('AVG_UP_DOWN_NUM:%s\tCOEF_AVG:%.2f\tCOEF_MAX:%.2f' % (format(up_down_cnt / length, '.2%'), cov_cnt, coef_max))
 
 # -----------------------------------------------------------------------------
-def correlation_analysis(subdir):
+def correlation_analysis(date):
     '''
     correlating shindex_seq with saindex_seq
     return:multi-value(num, coef)
     '''
 
     # Analysis 1 : up down statistics
-    num = up_down_num_statistics(subdir)
+    num = up_down_num_statistics(date)
 
     # Analysis 2 : seq_process - index sum sequence
-    shindex_seq = iohelper.read_pickle2list(subdir, 'shindex_seq')  # shanghai composite index sequence
+    shindex_seq = iohelper.read_pickle2objects(date, 'shindex_seq')  # shanghai composite index sequence
     if len(shindex_seq) == 50:
         shindex_seq.pop(25)
         shindex_seq.pop(0)
     shindex_seq = [float(index) for index in shindex_seq]
     saindex_seq = []    # sentiment index sequence
-    tmp = iohelper.read_pickle2list(subdir, 'saindex_seq')
+    tmp = iohelper.read_pickle2objects(date, 'saindex_seq')
     if len(tmp) == 50:
         tmp.pop(25)
         tmp.pop(0)
@@ -85,13 +99,13 @@ def correlation_analysis(subdir):
     shindex_seq = normalization_zero_mean(shindex_seq)
     saindex_seq = normalization_zero_mean(saindex_seq)
 
-    # tick_seq = tick_seq[1:47]        # two tick lag
-    # shindex_seq = shindex_seq[1:47]  # two tick lag
-    # saindex_seq = saindex_seq[0:46]  # two tick lag to show the sentiment
+    # tick_seq = tick_seq[1:47]        # two 5-min forward
+    # shindex_seq = shindex_seq[1:47]  # two 5-min forward
+    # saindex_seq = saindex_seq[0:46]  # two 5-min forward to show the sentiment
 
-    tick_seq = tick_seq[2:47]        # three tick lag
-    shindex_seq = shindex_seq[2:47]  # three tick lag
-    saindex_seq = saindex_seq[0:45]  # three tick lag to show the sentiment
+    # tick_seq = tick_seq[2:47]        # three 5-min forward
+    # shindex_seq = shindex_seq[2:47]  # three 5-min forward
+    # saindex_seq = saindex_seq[0:45]  # three 5-min forward to show the sentiment
 
     print('sh day index : %s %d' % (shindex_seq, len(shindex_seq)))
     print('sa day index : %s %d' % (saindex_seq, len(saindex_seq)))
@@ -99,12 +113,12 @@ def correlation_analysis(subdir):
 
     coef = pearson_corr(shindex_seq, saindex_seq)
     print(coef)
-    plot_index_and_sentiment(tick_seq, shindex_seq, saindex_seq, subdir)
+    plot_index_and_sentiment(tick_seq, shindex_seq, saindex_seq, date)
     return num, coef, len(tick_seq)
 
-def up_down_num_statistics(subdir):
+def up_down_num_statistics(date):
     shindex_seq = []
-    tmp = iohelper.read_pickle2list(subdir, 'shindex_seq')
+    tmp = iohelper.read_pickle2objects(date, 'shindex_seq')
     if len(tmp) == 50:
         tmp.pop(25)
         tmp.pop(0)
@@ -115,7 +129,7 @@ def up_down_num_statistics(subdir):
         else:
             shindex_seq.append(tmp[i] - tmp[i - 1])
 
-    saindex_seq = iohelper.read_pickle2list(subdir, 'saindex_seq')
+    saindex_seq = iohelper.read_pickle2objects(date, 'saindex_seq')
     if len(saindex_seq) == 50:
         saindex_seq.pop(25)
         saindex_seq.pop(0)
@@ -177,7 +191,7 @@ def get_tick_time_series():
             break
     return tick_seq
 
-def plot_index_and_sentiment(tick_seq, shindex_seq, sentiment_seq, subdir):
+def plot_index_and_sentiment(tick_seq, shindex_seq, sentiment_seq, date):
     if len(tick_seq) != len(shindex_seq) or len(tick_seq) != len(sentiment_seq):
         print('error(plot) : three sequence length is not same')
         return
@@ -209,7 +223,8 @@ def plot_index_and_sentiment(tick_seq, shindex_seq, sentiment_seq, subdir):
     plt.ylabel("Index Value")
     plt.legend()
     # plt.show()
-    filepath = './Pic/' + subdir + '.png'
+    global subdir
+    filepath = './Pic/' + subdir + '/' + date + '.png'
     plt.savefig(filepath)
 
 if __name__ == '__main__':

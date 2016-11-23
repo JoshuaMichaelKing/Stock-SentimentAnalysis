@@ -15,7 +15,7 @@ from nltk.metrics import BigramAssocMeasures
 from nltk.probability import FreqDist, ConditionalFreqDist
 
 from sklearn.svm import SVC, LinearSVC, NuSVC
-from sklearn.naive_bayes import GaussianNB, MultinomialNB, BernoulliNB
+from sklearn.naive_bayes import MultinomialNB, BernoulliNB
 from sklearn.linear_model import LogisticRegression
 from nltk.classify.scikitlearn import SklearnClassifier
 from sklearn.metrics import accuracy_score
@@ -39,32 +39,33 @@ Machine Learning Sentiment Classifier : Feature Selection(NLTK 3.x Version)
 best_words = set()
 
 def main():
-    pos_tk_lst = iohelper.read_pickle2list('./Reviews/pos_reviews.pkl')
-    neg_tk_lst = iohelper.read_pickle2list('./Reviews/neg_reviews.pkl')
+    pos_tk_lst = iohelper.read_pickle2objects('./Reviews/pos_reviews.pkl')
+    neg_tk_lst = iohelper.read_pickle2objects('./Reviews/neg_reviews.pkl')
     # 使评论集合随机分布
     shuffle(pos_tk_lst)
     shuffle(neg_tk_lst)
     posWords = list(itertools.chain(*pos_tk_lst)) #把多维数组解链成一维数组
     negWords = list(itertools.chain(*neg_tk_lst)) #同理
 
-    # 二选一(前面是所有词，后面是所有词+双词，基于卡方检验疾进行特诊选择)
-    print('Word Feature Selection-Chi-sq!')
+    # 二选一(前面是所有词，后面是所有词+双词，基于卡方检验疾进行特征选择)
+    print('1.Word Feature Selection-Chi-sq!')
     word_scores = create_word_scores(posWords, negWords)
-    # print('Word_Plus_Bigram Feature Selection-Chi-sq!')
+    # print('2.Word_Plus_Bigram Feature Selection-Chi-sq!')
     # pos_tk_lst = words_plus_bigram(pos_tk_lst)
     # neg_tk_lst = words_plus_bigram(neg_tk_lst)
     # word_scores = create_word_bigram_scores(posWords, negWords)
 
     global best_words
     best_words = find_best_words(word_scores, 1500)
+    iohelper.save_objects2pickle(best_words, './Reviews/best_words.pkl')
 
-    posFeatures = pos_features(pos_tk_lst, best_word_features)
+    posFeatures = pos_features(pos_tk_lst, best_word_features)   # [[{'':True, '':True,...}, 'pos'], [{'':True, '':True,...}, 'neg']]
     negFeatures = neg_features(neg_tk_lst, best_word_features)
     print('POS_FEATURES_LENGTH %d\tNEG_FEATURES_LENGTH %d' % (len(posFeatures), len(negFeatures)))
     assert len(posFeatures) == len(negFeatures)
     print ('-------------------------------------------------')
 
-    Classifier_Type = ['Lexicon', 'LR', 'GaussianNB', 'BernoulliNB', 'MultinomiaNB', 'LinearSVC', 'NuSVC', 'SVC']
+    Classifier_Type = ['Lexicons', 'LR', 'BernoulliNB', 'MultinomialNB', 'LinearSVC', 'NuSVC', 'SVC']
     (pos_lexicon_dict, neg_lexicon_dict) = rp.load_sentiment_lexicon()
 
     # 10_fold_cross-validation(10折交叉验证)
@@ -84,7 +85,7 @@ def main():
         precision = 0.0
         recall = 0.0
         score = 0.0
-        if tp == 'Lexicon':
+        if tp == 'Lexicons':
             posTmp = posFeatures
             negTmp = negFeatures
             posFeatures = pos_tk_lst
@@ -100,32 +101,30 @@ def main():
             else:
                 train_list = posFeatures[:(k-1)*offset_size] + posFeatures[k*offset_size:] + negFeatures[:(k-1)*offset_size] + negFeatures[k*offset_size:]
 
-            if tp == 'Lexicon':
+            if tp == 'Lexicons':
                 test = test_list
                 test_tag = ['pos' for i in range(offset_size)]
                 test_tag.extend(['neg' for i in range(offset_size)])
                 precision, recall, score = sentiment_lexicon_score(pos_lexicon_dict, neg_lexicon_dict, test, test_tag)
             else:
-                test, test_tag = zip(*test_list)  # 将内部的元素list(dict和string)分解成两类tuple
+                test, test_tag = zip(*test_list)  # 将内部的元素list(dict和string)分解成两类tuple({}, {}, {},...)和('pos', 'pos', 'neg', ...)
                 if tp == 'LR':
-                    precision, recall, score = classifier_score(LogisticRegression(), train_list, test, test_tag)
-                elif tp == 'GaussianNB':
-                    precision, recall, score = classifier_score(BernoulliNB(), train_list, test, test_tag)
+                    precision, recall, score = classifier_score(tp, LogisticRegression(), train_list, test, test_tag)
                 elif tp == 'BernoulliNB':
-                    precision, recall, score = classifier_score(BernoulliNB(), train_list, test, test_tag)
-                elif tp == 'MultinomiaNB':
-                    precision, recall, score = classifier_score(BernoulliNB(), train_list, test, test_tag)
+                    precision, recall, score = classifier_score(tp, BernoulliNB(), train_list, test, test_tag)
+                elif tp == 'MultinomialNB':
+                    precision, recall, score = classifier_score(tp, MultinomialNB(), train_list, test, test_tag)
                 elif tp == 'LinearSVC':
-                    precision, recall, score = classifier_score(BernoulliNB(), train_list, test, test_tag)
+                    precision, recall, score = classifier_score(tp, LinearSVC(), train_list, test, test_tag)
                 elif tp == 'NuSVC':
-                    precision, recall, score = classifier_score(NuSVC(), train_list, test, test_tag)
+                    precision, recall, score = classifier_score(tp, NuSVC(probability=True), train_list, test, test_tag)
                 elif tp == 'SVC':
-                    precision, recall, score = classifier_score(SVC(gamma=0.001, C=100., kernel='linear'), train_list, test, test_tag)
+                    precision, recall, score = classifier_score(tp, SVC(gamma=0.001, C=100., kernel='linear', probability=True), train_list, test, test_tag)
             avg_scores[tp] += score
             avg_precision[tp] += precision
             avg_recall[tp] += recall
             print ('The precision recall accuracy score is repectively : %f %f %f' % (precision, recall, score))
-        if tp == 'Lexicon':
+        if tp == 'Lexicons':
             posFeatures = posTmp
             negFeatures = negTmp
             posTmp = []
@@ -164,15 +163,15 @@ def sentiment_lexicon_score(pos_lexicon_dict, neg_lexicon_dict, test, test_tag):
     return pos_precision, pos_recall, accuracy_score(test_tag, pred)
 
 #------------------------------------------------------------------------------
-def classifier_score(classifier, train_list, test, test_tag):
+def classifier_score(tp, classifier, train_list, test, test_tag):
     '''
     传入分类器进行分类
     Output:pos_precision, pos_recall, accuracy_score
     '''
     classifier = SklearnClassifier(classifier)
     classifier.train(train_list)
+    iohelper.save_objects2pickle(classifier, './Reviews/' + tp + '.pkl')
     pred = classifier.classify_many(test)  # 返回的是结果集的list
-
     y_true = [1 if tag == 'pos' else 0 for tag in test_tag]
     y_pred = [1 if tag == 'pos' else 0 for tag in pred]
     pos_precision = precision_score(y_true, y_pred)

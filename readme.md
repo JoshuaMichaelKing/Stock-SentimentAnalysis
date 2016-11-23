@@ -1,30 +1,30 @@
 ## Stock Index Prediction Based on Sentiment Analysis(基于情感分析的股指预测)
 
-### data explore and preprocessing(数据集预处理)
+### Data Preprocessing(数据集预处理)
 - stocktime.py is to provide the basic open time and close time of A stock(Shanghai Composite Index) in China
 - snspy.py(supported by liaoxuefeng) is to get microblog from sina
 - weibo.py is to process every blog clean and save it to txt every 5 minutes
 - stockindex.py is to get newest market data from sina js server and save list to pickle(shindex_seq.pkl), list contains every 5-min close index
 
-### reviews preprocessing(评论的手动标注)
+### Reviews Preprocessing(评论的手动标注)
 - reviews_preprocessing.py is to seperate all the reviews into two part : positive and negative part(with some handful work)
 - save the negative set to ./Reviews/neg_reviews.pkl and the positive set to ./Reviews/pos_reviews.pkl
 
-### classifier score(分类器的比较)
+### Classifier Score(分类器的比较)
 - tools : using the package nltk and scikit-learn to implement machine learning method
 - using the hand-tag positive and negative reviews to implement machine learning classifier(Logistic Regression, Naive Bayes and Support Vector Machine)
 
-### sentiment index computing(情感系数的计算)
+### Sentiment Index Computation(情感系数的计算)
 - sentiment.py is to compute index from Comments/20160000/****.txt and save list to pickle(saindex_seq.pkl), list contains every 5 minutes sentiment index
 
-### correlation analysis(相关性分析)
+### Correlation Analysis(相关性分析)
 - correlation.py is to correlate the sequence of sentiment index and shanghai composite index at a specified day
 
-### linear regression(多元线性回归)
+### Linear Regression(多元线性回归)
 - use historical 5-min close index to predict next close index(multi-linear regression)
 - plus 5-min sentiment-index into multi-factor and predict again
 
-### other info(配置及文件夹信息)
+### Other Infos(配置及文件夹信息)
 - config.ini is to write information(App Key, App Secret and Callback URL) to connect sina open api
 - Directory Comments is to save all the online comments from sina weibo
 - Directory Lexicons is to save lexicon dict
@@ -32,47 +32,102 @@
 - Directory Sentiment Index is to save everyday 5-min sentiment index time Series
 - Directory Stock Index is to save everyday 5-min stock close index time series
 
-### the classifying result(分类结果)
+### The Classifying Result(分类结果)
 - not use bigrams
-1. The Lexicon's average precision recall accuracy score is repectively : 0.95 0.93 0.94
-2. The LR's average precision recall accuracy score is repectively : 0.91 0.89 0.90
-3. The GaussianNB's average precision recall accuracy score is repectively : 0.87 0.82 0.85
-4. The BernoulliNB's average precision recall accuracy score is repectively : 0.87 0.82 0.85
-5. The MultinomiaNB's average precision recall accuracy score is repectively : 0.87 0.82 0.85
-6. The LinearSVC's average precision recall accuracy score is repectively : 0.87 0.82 0.85
-7. The NuSVC's average precision recall accuracy score is repectively : 0.90 0.89 0.89
-8. The SVC's average precision recall accuracy score is repectively : 0.85 0.86 0.85
+The Lexicons's average precision recall accuracy score is repectively : 0.95 0.93 0.94
+The LR's average precision recall accuracy score is repectively : 0.91 0.90 0.90
+The BernoulliNB's average precision recall accuracy score is repectively : 0.87 0.82 0.85
+The MultinomialNB's average precision recall accuracy score is repectively : 0.87 0.80 0.84
+The LinearSVC's average precision recall accuracy score is repectively : 0.90 0.89 0.90
+The NuSVC's average precision recall accuracy score is repectively : 0.89 0.88 0.89
+The SVC's average precision recall accuracy score is repectively : 0.85 0.85 0.85
 
 - use bigrams
-1. The Lexicon's average precision recall accuracy score is repectively : 0.95 0.93 0.94
-2. The LR's average precision recall accuracy score is repectively : 0.91 0.89 0.90
-3. The GaussianNB's average precision recall accuracy score is repectively : 0.87 0.81 0.85
-4. The BernoulliNB's average precision recall accuracy score is repectively : 0.87 0.81 0.85
-5. The MultinomiaNB's average precision recall accuracy score is repectively : 0.87 0.81 0.85
-6. The LinearSVC's average precision recall accuracy score is repectively : 0.87 0.81 0.85
-7. The NuSVC's average precision recall accuracy score is repectively : 0.90 0.88 0.89
-8. The SVC's average precision recall accuracy score is repectively : 0.85 0.85 0.85
+The Lexicon's average precision recall accuracy score is repectively : 0.95 0.93 0.94
+The LR's average precision recall accuracy score is repectively : 0.91 0.89 0.90
+The BernoulliNB's average precision recall accuracy score is repectively : 0.87 0.81 0.85
+The MultinomialNB's average precision recall accuracy score is repectively : 0.87 0.80 0.84
+The LinearSVC's average precision recall accuracy score is repectively : 0.89 0.88 0.89
+The NuSVC's average precision recall accuracy score is repectively : 0.90 0.88 0.89
+The SVC's average precision recall accuracy score is repectively : 0.85 0.85 0.85
 
-### the prediction result(预测结果)
-- not use emotion
-1. error_fit_score: 0.996965582925    error_predict_score: 0.970354598799
-2. rmse_fit_score: 5.16586476254      rmse_predict_score: 5.10588622678
-3. mape_fit_score: 0.00112419981721   mape_predict_score: 0.00104280710265
+### The Prediction Result(预测结果)
+- contains historical data and plus sentiment index(based on lexicons and best-classifier:LR)
+- from left to right, the metrics name respectively is : MA, RMSE, MAPE
+#### Historical Regression
+Test-Metrics :   0.970355  5.105886  0.001043
 
+#### Lexicons-POS
+- AVG_UP_DOWN_NUM:50.21%	COEF_AVG:0.55	COEF_MAX:0.89
 - use emotion with forward_unit 0
-1. error_fit_score: 0.996995821276    error_predict_score: 0.970084925573
-2. rmse_fit_score: 5.14006106853      rmse_predict_score: 5.1290568296
-3. mape_fit_score: 0.00112849996807   mape_predict_score: 0.00106378219496
-
+Test-Metrics :   0.963524  5.663620  0.001307
 - use emotion with forward_unit 1
-1. error_fit_score: 0.996972124703    error_predict_score: 0.970275665737
-2. rmse_fit_score: 5.1602933173       rmse_predict_score: 5.11267910699
-3. mape_fit_score: 0.00112252633156   mape_predict_score: 0.0010481331951
-
+Test-Metrics :   0.969921  5.143081  0.001062
 - use emotion with forward_unit 2
-1. error_fit_score: 0.996970108219    error_predict_score: 0.97029889752
-2. rmse_fit_score: 5.16201134014      rmse_predict_score: 5.11068074653
-3. mape_fit_score: 0.00112411317457   mape_predict_score: 0.00104823883078
+Test-Metrics :   0.964569  5.581913  0.001198
+
+#### Lexicons-NEG
+- AVG_UP_DOWN_NUM:50.21%	COEF_AVG:0.55	COEF_MAX:0.91
+- use emotion with forward_unit 0
+Test-Metrics :   0.968722  5.244613  0.001122
+- use emotion with forward_unit 1
+Test-Metrics :   0.969858  5.148468  0.001050
+- use emotion with forward_unit 2
+Test-Metrics :   0.967904  5.312698  0.001109
+
+#### Lexicons-TOTAL
+- AVG_UP_DOWN_NUM:52.29%	COEF_AVG:0.48	COEF_MAX:0.85
+- use emotion with forward_unit 0
+Test-Metrics :   0.966926  5.393047  0.001120
+- use emotion with forward_unit 1(*****)
+Test-Metrics :   0.970562  5.088002  0.001040
+- use emotion with forward_unit 2
+Test-Metrics :   0.968081  5.298080  0.001099
+
+#### Lexicons-LOG
+- AVG_UP_DOWN_NUM:52.29%	COEF_AVG:0.48	COEF_MAX:0.87
+- use emotion with forward_unit 0
+Test-Metrics :   0.969931  5.142224  0.001051
+- use emotion with forward_unit 1
+Test-Metrics :   0.970319  5.108980  0.001042
+- use emotion with forward_unit 2
+Test-Metrics :   0.970151  5.123398  0.001057
+
+#### LR-POS
+- AVG_UP_DOWN_NUM:50.62%	COEF_AVG:0.54	COEF_MAX:0.90
+- use emotion with forward_unit 0(****)
+Test-Metrics :   0.970476  5.095428  0.001042
+- use emotion with forward_unit 1
+Test-Metrics :   0.970361  5.105314  0.001040
+- use emotion with forward_unit 2
+Test-Metrics :   0.970142  5.124187  0.001053
+
+#### LR-NEG
+- AVG_UP_DOWN_NUM:50.62%	COEF_AVG:0.55	COEF_MAX:0.89
+- use emotion with forward_unit 0
+Test-Metrics :   0.970899  5.058781  0.001039
+- use emotion with forward_unit 1
+Test-Metrics :   0.970319  5.108953  0.001040
+- use emotion with forward_unit 2
+Test-Metrics :   0.970280  5.112336  0.001052
+
+#### LR-TOTAL
+- AVG_UP_DOWN_NUM:54.38%	COEF_AVG:0.46	COEF_MAX:0.89
+- use emotion with forward_unit 0
+Test-Metrics :   0.969599  5.170520  0.001049
+- use emotion with forward_unit 1
+Test-Metrics :   0.970363  5.105129  0.001041
+- use emotion with forward_unit 2
+Test-Metrics :   0.970068  5.130467  0.001055
+
+#### LR-LOG
+- AVG_UP_DOWN_NUM:54.38%	COEF_AVG:0.48	COEF_MAX:0.88
+- use emotion with forward_unit 0
+Test-Metrics :   0.969922  5.143031  0.001051
+- use emotion with forward_unit 1
+Test-Metrics :   0.970315  5.109257  0.001042
+- use emotion with forward_unit 2
+Test-Metrics :   0.970151  5.123417  0.001057
 
 ### OpenSource Protocol(开源协议)
 - These source code are distributed under the MIT.

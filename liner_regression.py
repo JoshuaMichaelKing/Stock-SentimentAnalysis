@@ -39,18 +39,31 @@ date_of_may = ['20160503', '20160504', '20160505', '20160506',
 date_of_june = ['20160601', '20160602', '20160606', '20160613',
 '20160614', '20160615', '20160620', '20160622', '20160624', '20160628']
 
-
 def main():
+    '''
+    主函数，实现基于历史数据的多元线性回归和附加情感系数的
+    '''
+    global num_of_closing_price_to_predicate, use_emotion, forward_unit
+    use_emotion_or_not = raw_input("Using Sentiment Index(yes) or not(no) to do linear regression? Please input yes or no!")
+    if use_emotion_or_not == 'yes':
+        use_emotion = True
+        forward_unit_str = raw_input("Using forward unit of emotion? Please input 0 or 1 or 2!")
+        if forward_unit_str == '0':
+            forward_unit = 0
+        elif forward_unit_str == '1':
+            forward_unit = 1
+        else:
+            forward_unit = 2
+    else:
+        use_emotion = False
 
     (train, test) = read_data()
     (arr_train_x, arr_train_y, arr_test_x, arr_test_y) = transform_original_data_2_train_data_and_test_data(train, test)
-    global use_emotion
-    global num_of_closing_price_to_predicate
     if not use_emotion:
         arr_train_x = arr_train_x[:, 0:num_of_closing_price_to_predicate]
         arr_test_x = arr_test_x[:, 0:num_of_closing_price_to_predicate]
-    (fit_metrics, predict_metrics) = linear_regression(arr_train_x, arr_train_y, arr_test_x, arr_test_y)
-    print_metrics(fit_metrics, predict_metrics)
+    metrics_list = linear_regression(arr_train_x, arr_train_y, arr_test_x, arr_test_y)
+    print_metrics(metrics_list)
 
 def linear_regression(train_x, train_y, test_x, test_y):
     '''
@@ -62,50 +75,60 @@ def linear_regression(train_x, train_y, test_x, test_y):
     y_fit = np.dot(train_x, regressor.coef_ ) + regressor.intercept_
     # print('---'+str(regressor.coef_) + '---'+str(regressor.intercept_))
     # 计算拟合误差
-    error_fit = regressor.score(train_x, train_y)
+    ma_fit = regressor.score(train_x, train_y)       # 计算平均精度(mean accuracy)
     rmse_fit = rmse(y_fit, train_y)
     mape_fit = mape(y_fit, train_y)
 
     # 预测
     y_predict = regressor.predict(test_x)
-    error_predict = regressor.score(test_x, test_y)
+    # 计算拟合误差
+    ma_predict = regressor.score(test_x, test_y)     #　计算平均精度(mean accuracy)
     rmse_predict = rmse(y_predict, test_y)
     mape_predict = mape(y_predict, test_y)
 
     # 绘制对比图
-    global num_of_closing_price_to_predicate
-    dir_list = []
-    dir_list.extend(date_of_march[1:])  # 跳过第一天
-    dir_list.extend(date_of_april)
-    dir_list.extend(date_of_may)
-    day = 0
-    begin = num_of_closing_price_to_predicate
-    for one_day in dir_list:
-        day_start = begin + day*48
-        day_end = day_start + 48
-        global forward_unit
-        global use_emotion
-        picture_name_suffix = ''
-        if use_emotion:
-            picture_name_suffix = str(forward_unit)+'emotion'
-        picture(y_fit[day_start:day_end], train_y[day_start:day_end], 'train'+picture_name_suffix+one_day)
-        if day_end <= len(y_predict):
-            picture(y_predict[day_start:day_end], test_y[day_start:day_end], 'predict'+picture_name_suffix+date_of_june[day+1])
-        day = day+1
-    return (['error_fit_score: '+str(error_fit), 'rmse_fit_score: '+ str(rmse_fit), 'mape_fit_score: ' + str(mape_fit)], \
-            ['error_predict_score: '+str(error_predict), 'rmse_predict_score: ' + str(rmse_predict), 'mape_predict_score: ' + str(mape_predict)])
+    # global num_of_closing_price_to_predicate
+    # dir_list = []
+    # dir_list.extend(date_of_march[1:])  # 跳过第一天
+    # dir_list.extend(date_of_april)
+    # dir_list.extend(date_of_may)
+    # day = 0
+    # begin = num_of_closing_price_to_predicate
+    # for one_day in dir_list:
+    #     day_start = begin + day * 48
+    #     day_end = day_start + 48
+    #     global forward_unit, use_emotion
+    #     picture_name_suffix = ''
+    #     if use_emotion:
+    #         picture_name_suffix = str(forward_unit) + 'emotion'
+    #     picture(y_fit[day_start:day_end], train_y[day_start:day_end], 'train'+picture_name_suffix+one_day)
+    #     if day_end <= len(y_predict):
+    #         picture(y_predict[day_start:day_end], test_y[day_start:day_end], 'predict'+picture_name_suffix+date_of_june[day+1])
+    #     day += 1
+    return [[ma_fit, rmse_fit, mape_fit], [ma_predict, rmse_predict, mape_predict]]
 
-###----  模型评价指标   ----
+#------------------------------------------------------------------------------
 def rmse(ymodel, yreal):
+    '''
+    root-mean-square-error
+    模型评价指标：均方根误差(又称标准误差，用于说明样本的离散程度)
+    '''
     return sp.sqrt(sp.mean((ymodel - yreal) ** 2))
 
 def mape(ymodel, yreal):
+    '''
+    mean-absolute-percentage-error
+    模型评价指标：平均绝对百分比误差
+    '''
     return np.sum(np.true_divide(np.abs(ymodel-yreal), yreal))/len(ymodel)
 
-###----   结果展示   ----
-def print_metrics(fit_metrics, predict_metrics):
-    for i in range(0, len(fit_metrics)):
-        print('---' + fit_metrics[i] + '---' + predict_metrics[i] + '---')
+#------------------------------------------------------------------------------
+def print_metrics(metrics_list):
+    '''
+    评价结果
+    '''
+    # print('%16s : %10f%10f%10f' % ('Training-Metrics', metrics_list[0][0], metrics_list[0][1], metrics_list[0][2]))
+    print('%s : %10f%10f%10f' % ('Test-Metrics', metrics_list[1][0], metrics_list[1][1], metrics_list[1][2]))
 
 def picture(y_model, y_real, name):
     '''
@@ -131,7 +154,7 @@ def picture(y_model, y_real, name):
     # p1.xaxis.set_major_formatter(FuncFormatter(format_fn))
     # p1.xaxis.set_major_locator(MaxNLocator(integer=True, nbins=12))
     x = range(1, len(y_model)+1)
-    p1.plot(x, y_model, 'o-', label="model", color="red", linewidth=3)
+    p1.plot(x, y_model, 'o-', label="model", color="red", linewidth=1)
     p1.plot(x, y_real, 'o-', label="real", color="blue", linewidth=1)
 
     plt.title(name)
@@ -141,15 +164,12 @@ def picture(y_model, y_real, name):
     filepath = './Pic/' + name + '.png'
     plt.savefig(filepath)
 
-###----  数据读取  ----
+#------------------------------------------------------------------------------
 def read_data():
     '''
     read closing data from files
     '''
-    global date_of_march
-    global date_of_april
-    global date_of_may
-    global date_of_june
+    global date_of_march, date_of_april, date_of_may, date_of_june
 
     dir_list = []
     dir_list.extend(date_of_march)
@@ -160,32 +180,34 @@ def read_data():
     original_train_data = [[], []]
     for subdir in dir_list:
         # 股指数据
-        train_seq = iohelper.read_pickle2list(subdir, 'shindex_seq')
+        train_seq = iohelper.read_pickle2objects(subdir, 'shindex_seq')
         original_train_data[0].extend(map(float, train_seq))
         # 情感数据
-        train_seq = iohelper.read_pickle2list(subdir, 'saindex_seq')
+        train_seq = iohelper.read_pickle2objects(subdir, 'saindex_seq')
         original_train_data[1].extend(map(float, train_seq))
 
     # 测试集
     original_test_data = [[], []]
     for subdir in date_of_june:
         # 股指数据
-        test_seq = iohelper.read_pickle2list(subdir, 'shindex_seq')
+        test_seq = iohelper.read_pickle2objects(subdir, 'shindex_seq')
         original_test_data[0].extend(map(float, test_seq))
         # 情感数据
-        test_seq = iohelper.read_pickle2list(subdir, 'saindex_seq')
+        test_seq = iohelper.read_pickle2objects(subdir, 'saindex_seq')
         original_test_data[1].extend(map(float, test_seq))
 
     return (original_train_data, original_test_data)
 
-###----  数据转换  ----
+#------------------------------------------------------------------------------
 def transform_original_data_2_train_data_and_test_data(original_train_data, original_test_data):
     '''
+    数据转换
     transform original closing data to train data and test data:
     use multiple closing price to predict one closing price
     '''
     len_train_data = len(original_train_data[0])
     len_test_data = len(original_test_data[0])
+    print (len_train_data, len(original_train_data[1]), len_test_data, len(original_test_data[1]))
 
     # 用于预测股指的收盘价数量
     global num_of_closing_price_to_predicate
@@ -201,24 +223,26 @@ def transform_original_data_2_train_data_and_test_data(original_train_data, orig
     # 股指数据
     for i in range(0, num_of_closing_price_to_predicate):
         # 训练集
-        stock_data = original_train_data[0][i:(len_train_data-num_of_closing_price_to_predicate+i)]
+        stock_data = original_train_data[0][i:(len_train_data - num_of_closing_price_to_predicate + i)]
         train_x.append(stock_data)
         # 测试集
-        stock_data = original_test_data[0][i:(len_test_data-num_of_closing_price_to_predicate+i)]
+        stock_data = original_test_data[0][i:(len_test_data - num_of_closing_price_to_predicate + i)]
         test_x.append(stock_data)
 
     # 情感数据
-      # 1. 训练集
+        # 1. 训练集
     global forward_unit
-    emotion_ratio = original_train_data[1][(num_of_closing_price_to_predicate-forward_unit):(len_train_data-forward_unit)]
-    closing_data = original_train_data[0][(num_of_closing_price_to_predicate-1):(len_train_data-1)]
-    emotion_data_train = map(lambda (a,b):a+b, zip(emotion_ratio,closing_data))
-    train_x.append(emotion_data_train)
-      # 2. 测试集
-    emotion_ratio = original_test_data[1][(num_of_closing_price_to_predicate-forward_unit):(len_test_data-forward_unit)]
-    closing_data = original_test_data[0][(num_of_closing_price_to_predicate-1):(len_test_data-1)]
-    emotion_data_test = map(lambda (a,b):a+b, zip(emotion_ratio,closing_data))
-    test_x.append(emotion_data_test)
+    emotion_ratio = original_train_data[1][(num_of_closing_price_to_predicate - forward_unit):(len_train_data - forward_unit)]
+    train_x.append(emotion_ratio)   #不加最近的指数(经测试发现下面加了指数的经过梯度下降后确定的参数一样)
+    # closing_data = original_train_data[0][(num_of_closing_price_to_predicate - 1):(len_train_data - 1)]
+    # emotion_data_train = map(lambda (a,b):a+b, zip(emotion_ratio,closing_data))
+    # train_x.append(emotion_data_train)
+        # 2. 测试集
+    emotion_ratio = original_test_data[1][(num_of_closing_price_to_predicate - forward_unit):(len_test_data - forward_unit)]
+    test_x.append(emotion_ratio)   #不加最近的指数(经测试发现下面加了指数的经过梯度下降后确定的参数一样)
+    # closing_data = original_test_data[0][(num_of_closing_price_to_predicate - 1):(len_test_data - 1)]
+    # emotion_data_test = map(lambda (a,b):a+b, zip(emotion_ratio,closing_data))
+    # test_x.append(emotion_data_test)
 
     train_y = original_train_data[0][num_of_closing_price_to_predicate:len_train_data]
     test_y = original_test_data[0][num_of_closing_price_to_predicate:len_test_data]
@@ -229,10 +253,10 @@ def transform_original_data_2_train_data_and_test_data(original_train_data, orig
     arr_test_y = np.array(test_y)
 
     # 测试生成的数据集是否正确
-    # print('------arr_train_x\'s shape ------' + str(arr_train_x.shape) + '------arr_train_x[0]\'s data ------' + str(arr_train_x[0]) )
-    # print('------train_y\'s shape ------' + str(arr_train_y.shape) + '------arr_train_y[0]\'s data ------' + str(arr_train_y[0]) )
-    # print('------arr_test_x\'s shape  ------' + str(arr_test_x.shape)  + '------arr_test_x[0]\'s data  ------' + str(arr_test_x[0]) )
-    # print('------arr_test_y\'s shape  ------' + str(arr_test_y.shape)  + '------arr_test_y[0]\'s data  ------' + str(arr_test_y[0]) )
+    # print('arr_train_x\'s shape ------' + str(arr_train_x.shape) + '------arr_train_x[0]\'s data ------' + str(arr_train_x[0]) )
+    # print('train_y\'s shape ------' + str(arr_train_y.shape) + '------arr_train_y[0]\'s data ------' + str(arr_train_y[0]) )
+    # print('arr_test_x\'s shape  ------' + str(arr_test_x.shape)  + '------arr_test_x[0]\'s data  ------' + str(arr_test_x[0]) )
+    # print('arr_test_y\'s shape  ------' + str(arr_test_y.shape)  + '------arr_test_y[0]\'s data  ------' + str(arr_test_y[0]) )
 
     return(arr_train_x, arr_train_y, arr_test_x, arr_test_y)
 

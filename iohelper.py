@@ -90,9 +90,9 @@ def save_list2file(sentence_list, filefullpath):
     f.close()
 
 # pickle <--> list
-def read_pickle2list(fpath, fname=None):
+def read_pickle2objects(fpath, fname=None):
     '''
-    read pickle to list
+    read pickle to objects(object, list, set, dict and so on)
     '''
     output = ''
     if fname is None:
@@ -101,15 +101,15 @@ def read_pickle2list(fpath, fname=None):
         if fname.startswith('sh'):
             output = open('./Stock Index/' + fpath + '/' + fname + '.pkl', 'rb')
         elif fname.startswith('sa'):
-            output = open('./Stock Index/' + fpath + '/' + fname + '.pkl', 'rb')
+            output = open('./Sentiment Index/' + fpath + '/' + fname + '.pkl', 'rb')
     # Pickle dictionary using protocol 0.
-    list_seq = pickle.load(output)
+    objects = pickle.load(output)
     output.close()
-    return list_seq
+    return objects
 
-def save_list2pickle(word_list, fpath, fname=None):
+def save_objects2pickle(objects, fpath, fname=None):
     '''
-    save word list to file by pickle
+    save objects(object, list, set, dict and so on) to file by pickle
     '''
     output = ''
     if fname is None:
@@ -118,7 +118,7 @@ def save_list2pickle(word_list, fpath, fname=None):
         output = open('./Comments/' + fpath + '/' + fname + '.pkl', 'wb')
 
     # Pickle dictionary using protocol 0.
-    pickle.dump(word_list, output)
+    pickle.dump(objects, output)
     output.close()
 
 if __name__ == '__main__':

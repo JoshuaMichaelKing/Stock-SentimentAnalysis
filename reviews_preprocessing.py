@@ -29,8 +29,8 @@ def main():
     # pos_neg_cut_test()
 
     # pos_or_neg_reviews2pkl()    # 将手动标注的积极消极评论集转换为pkl存储
-    # pos_tk_lst = iohelper.read_pickle2list('./Reviews/pos_reviews.pkl') # read training corpus to list[[,...], [,...], ...]
-    # neg_tk_lst = iohelper.read_pickle2list('./Reviews/neg_reviews.pkl') # same as above
+    # pos_tk_lst = iohelper.read_pickle2objects('./Reviews/pos_reviews.pkl') # read training corpus to list[[,...], [,...], ...]
+    # neg_tk_lst = iohelper.read_pickle2objects('./Reviews/neg_reviews.pkl') # same as above
     # print('POS_REVIEWS_LENGTH %d\tNEG_REVIEWS_LENGTH %d' % (len(pos_tk_lst), len(neg_tk_lst)))
 
 #-------------------------------------------------------------------------------
@@ -43,8 +43,8 @@ def pos_or_neg_reviews2pkl():
     pos_list = iohelper.read_file2list('pos')
     neg_tk_lst = word_tokenization(neg_list)
     pos_tk_lst = word_tokenization(pos_list)    # segmentation : [[,], [,], ...]
-    iohelper.save_list2pickle(neg_tk_lst, './Reviews/neg_reviews.pkl')
-    iohelper.save_list2pickle(pos_tk_lst, './Reviews/pos_reviews.pkl')
+    iohelper.save_objects2pickle(neg_tk_lst, './Reviews/neg_reviews.pkl')
+    iohelper.save_objects2pickle(pos_tk_lst, './Reviews/pos_reviews.pkl')
 
 def word_tokenization(tick_blog_list):
     '''

@@ -19,13 +19,18 @@ __license__ = 'MIT'
 __author__ = 'Joshua Guo (1992gq@gmail.com)'
 
 '''
-Python : Using Sentiment-Lexicon to Implement Feature Selection and Sentiment Index Computing.
+1. Using IF-IDF to finish Stock-Oriented Sentiment Lexicons Construction
+2. Using Machine Learning and Lexicon to finish Sentiment Index Computing.
 '''
+
+g_best_words = set()
+g_classifier_name = 'LR'  # ['Lexicons', 'LR', 'BernoulliNB', 'MultinomialNB', 'LinearSVC', 'NuSVC', 'SVC']
 
 def main():
     FILE = os.curdir
     logging.basicConfig(filename=os.path.join(FILE, 'log.txt'), level=logging.ERROR)
-
+    global g_classifier_name
+    print('------------------%s-------------------' % (g_classifier_name))
     # loading postive and negtive sentiment lexicon
     pos_lexicon_dict = {}
     neg_lexicon_dict = {}
@@ -43,14 +48,18 @@ def main():
     lexicon = iohelper.read_lexicon2dict('negative.txt', True)
     neg_lexicon_dict = dict(neg_lexicon_dict, **lexicon)
 
-    print('pos_lexicon_dict length : %d' % len(pos_lexicon_dict))
-    print('neg_lexicon_dict length : %d' % len(neg_lexicon_dict))
+    print ('pos_lexicon_dict length : %d' % len(pos_lexicon_dict))
+    print ('neg_lexicon_dict length : %d' % len(neg_lexicon_dict))
 
-    print('---------------Sentiment Lexicon------------------')
-    sentiment_lexicon_compute(pos_lexicon_dict, neg_lexicon_dict)
+    global g_best_words
+    g_best_words = iohelper.read_pickle2objects('./Reviews/best_words.pkl')
+
+    print ('---------------Sentiment Index Computation------------------')
+    sentiment_index_compute(pos_lexicon_dict, neg_lexicon_dict)
+    print ('The End!')
 
 # -----------------------------------------------------------------------------
-def sentiment_lexicon_compute(pos_lexicon_dict, neg_lexicon_dict):
+def sentiment_index_compute(pos_lexicon_dict, neg_lexicon_dict):
     '''
     1. select the words to construct dictionary
     2. compute sentiment index according to the stock-oriented dictionary
@@ -62,9 +71,19 @@ def sentiment_lexicon_compute(pos_lexicon_dict, neg_lexicon_dict):
     closetime = st.closetime
     tick_delta = dt.timedelta(minutes=5)
 
-    status = raw_input("Construct dictionary or compute sentiment index? Please input yes(lexicon construction) or no(compute sentiment index)!")
+    # status = raw_input("Construct lexicons or compute sentiment index? Please input yes(lexicon construction) or no(compute sentiment index)!")
+    status = 'no'
     isPrint = False  # use the flag to print the word score in sentiment computing
-    log_or_not = raw_input("Using logarithm(yes) or not(no)? Please input yes or no!")
+    ml_or_lexicons = raw_input("Compute Sentiment Index:Using machine learning(yes) or lexicons(no)? Please input yes or no!")
+    computeType = raw_input("Using only pos(1) or neg(2) or total(3) or logarithm(4)? Please input 1 or 2 or 3 or 4!")
+    if computeType == '1':
+        computeType = 'pos'
+    elif computeType == '2':
+        computeType = 'neg'
+    elif computeType == '3':
+        computeType = 'total'
+    elif computeType == '4':
+        computeType = 'log'
 
     review_list_day = []
     date_of_march = ['20160329', '20160331']
@@ -77,16 +96,15 @@ def sentiment_lexicon_compute(pos_lexicon_dict, neg_lexicon_dict):
     '20160516', '20160517', '20160518', '20160519', '20160520',
     '20160523', '20160524', '20160525', '20160526', '20160527',
     '20160530', '20160531']
-
     # june = 10 (compute 10 days sentiment index to make correlation analysis)
     date_of_june = ['20160606',
     '20160613', '20160614', '20160615',
     '20160620', '20160622', '20160624', '20160628']
-    review_list_day.extend(date_of_march)
-    review_list_day.extend(date_of_april)
-    review_list_day.extend(date_of_may)
-    review_list_day.extend(date_of_june) # just for test by month
-    # review_list_day = ['20160601']
+    # review_list_day.extend(date_of_march)
+    # review_list_day.extend(date_of_april)
+    # review_list_day.extend(date_of_may)
+    review_list_day.extend(date_of_june)
+    # review_list_day = ['20160420']        # just for test
 
     for subdir in review_list_day:
         tick_now = opentime1
@@ -109,61 +127,81 @@ def sentiment_lexicon_compute(pos_lexicon_dict, neg_lexicon_dict):
                 # Compute Sentiment Index
                 if status != 'yes':
                     score_tmp = 0
-                    if log_or_not == 'yes':
-                        score_tmp = sentiment_compute_logarithm(pos_lexicon_dict, neg_lexicon_dict, tick_blog_list, isPrint)
+                    if ml_or_lexicons == 'yes':
+                        score_tmp = sentiment_machine_learning(tick_blog_list, computeType, isPrint)
                     else:
-                        score_tmp = sentiment_compute_average(pos_lexicon_dict, neg_lexicon_dict, tick_blog_list, isPrint)
+                        score_tmp = sentiment_lexicons_compute(pos_lexicon_dict, neg_lexicon_dict, tick_blog_list, computeType, isPrint)
                     sentiment_index.append(score_tmp)
             elif tick_now > midclose and tick_now < opentime2:
                 tick_now = opentime2
             elif tick_now > closetime:
                 break
-        # not necessary if you have processed it to word_tfidf list txt pkl
+        # not necessary if you have provessed it to TF-IDF word dict
         if status == 'yes':
             word_preprocessing(blog_corpus, subdir)
             print('%s : word selected from blog_corpus successfully!' % (subdir))
         else:
-            iohelper.save_list2pickle(sentiment_index, './Sentiment Index/' + subdir + '/saindex_seq')
-            print('%s : save_list2pickle successfully! %d' % (subdir, len(sentiment_index)))
-
+            iohelper.save_objects2pickle(sentiment_index, './Sentiment Index/' + subdir + '/saindex_seq.pkl')
+            print('%s : save_objects2pickle successfully! %d' % (subdir, len(sentiment_index)))
     print('Ending.....')
 
 # -----------------------------------------------------------------------------
-def sentiment_compute_average(pos_lexicon_dict, neg_lexicon_dict, tick_blog_segments, isPrint):
+def compute_by_type(pos_list, neg_list, computeType = 'log'):
     '''
-    <<<obsolete method>>>
-    basic plus for positive and minus for negative to compute index average
+    computation type contains : log, avg, total, pos, neg(log is default)
+    pos : using sigma[pos]
+    neg : using sigma[neg]
+    total : using (sigma[pos] + sigma[neg])
+    avg : using (sigma[pos] + sigma[neg]) / n
+    log : using ln((1+sigma[pos]) / (1+sigma[neg])) formula
     '''
-    index_list = []
-    tick_value_tmp = float(0)
-    for doc in tick_blog_segments:
-        sentence_count = 0
-        doc_tmp = []
-        for word in doc:
-            if is_word_invalid(word):
-                continue
+    if computeType == 'log':
+        return log(float(1 + sum(pos_list)) / float(1 + sum(neg_list)))
+    elif computeType == 'pos':
+        return float(sum(pos_list))
+    elif computeType == 'neg':
+        return float(sum(neg_list))
+    elif computeType == 'total':
+        return float(sum(pos_list) - sum(neg_list))
+    else:
+        print ('Error : Not this computation type!')
+        assert 1 == 0
+
+# -----------------------------------------------------------------------------
+def sentiment_machine_learning(tick_blog_segments, computeType = 'log', isPrint = False):
+    '''
+    using supervised learning classifier to compute every sentence's sentiment index
+    '''
+    # 返回５分钟评论的句子的特征集合
+    global g_best_words
+    tick_features = []
+    for comment in tick_blog_segments:
+        tmp = dict([(word, True) for word in comment if word in g_best_words])
+        tick_features.append(tmp)
+    if len(tick_features) == 0:
+        return 0.01
+    # 读取训练好的分类器
+    classifier = iohelper.read_pickle2objects('./Reviews/' + g_classifier_name + '.pkl')
+    ret = classifier.prob_classify_many(tick_features)
+
+    pos_list = []
+    neg_list = []
+    for prob_dict in ret:
+        samples = prob_dict.samples()  # 含有积极和消极类别的概率，概率总和始终为1
+        for sp in samples:
+            if sp == 'pos':
+                pos_list.append(prob_dict.prob(sp))
             else:
-                doc_tmp.append(word)
-        for word in doc_tmp:
-            if word in pos_lexicon_dict:
-                if isPrint:
-                    print("%s + %d" % (word, pos_lexicon_dict[word]))
-                sentence_count += pos_lexicon_dict[word]
-            elif word in neg_lexicon_dict:
-                if isPrint:
-                    print("%s - %d" % (word, neg_lexicon_dict[word]))
-                sentence_count -= neg_lexicon_dict[word]
-        index_list.append(sentence_count)
-    if len(index_list) is not 0:
-        tick_value_tmp = sum(index_list) / float(len(index_list))
-    # if isPrint:
-    print('average : %f' % tick_value_tmp)
+                neg_list.append(prob_dict.prob(sp))
+    tick_value_tmp = compute_by_type(pos_list, neg_list, computeType)
+    if isPrint:
+        print('FIRST-5-MIN Index : %f' % tick_value_tmp)
     return tick_value_tmp
 
 # -----------------------------------------------------------------------------
-def sentiment_compute_logarithm(pos_lexicon_dict, neg_lexicon_dict, tick_blog_segments, isPrint = False):
+def sentiment_lexicons_compute(pos_lexicon_dict, neg_lexicon_dict, tick_blog_segments, computeType = 'log', isPrint = False):
     '''
-    using ln((1+sigma[pos])/(1+sigma[neg])) formula
+    using sentiment lexicons to compute sentiment index
     '''
     pos_list = []
     neg_list = []
@@ -184,7 +222,7 @@ def sentiment_compute_logarithm(pos_lexicon_dict, neg_lexicon_dict, tick_blog_se
                 neg_count += neg_lexicon_dict[word]
         pos_list.append(pos_count)
         neg_list.append(neg_count)
-    tick_value_tmp = log(float(1 + sum(pos_list)) / float(1 + sum(neg_list)))
+    tick_value_tmp = compute_by_type(pos_list, neg_list, computeType)
     if isPrint:
         print('FIRST-5-MIN Index : %f' % tick_value_tmp)
     return tick_value_tmp
@@ -229,7 +267,7 @@ def word_preprocessing(blog_corpus, subdir):
         tp.append(word_tfidf_dict[word])
         word_tfidf_list.append(tp)
     print('word_preprocessing-all new word number %d' % len(word_tfidf_list))
-    iohelper.save_list2pickle(word_tfidf_list, subdir, 'wordTFDict')
+    iohelper.save_objects2pickle(word_tfidf_list, subdir, 'wordTFDict')
     print('word_preprocessing-save word_list_tfidf success!')
 
 # -----------------------------------------------------------------------------
