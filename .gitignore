@@ -62,5 +62,6 @@ target/
 .ipynb_checkpoints
 
 #Redundant Info
-*.txt
+Comments/**/*.txt
+log.txt
 Pic/
