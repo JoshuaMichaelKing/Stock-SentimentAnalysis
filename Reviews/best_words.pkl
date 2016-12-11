@@ -1184,7 +1184,7 @@ p551
 aV\u6f5c\u529b
 p552
 aV\u5411
-aV\u4e2d\u5c06
+aVgood
 p553
 aV\u4f17
 aV\u53d1\u52a8
@@ -1593,7 +1593,7 @@ aV·
 aV\u683c
 aV\u51b7\u9759
 p736
-aVgood
+aV\u4e2d\u5c06
 p737
 aV\u5229\u597d
 p738

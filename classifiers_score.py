@@ -5,7 +5,7 @@ from __future__ import print_function
 from __future__ import division
 import os, sys, codecs, logging
 from math import log
-import datetime as dt
+import datetime
 import itertools
 from random import shuffle
 from itertools import chain
@@ -148,6 +148,7 @@ def sentiment_lexicon_score(pos_lexicon_dict, neg_lexicon_dict, test, test_tag):
     if type(test) is not type([]):
         raise TypeError("There is a type error","input test should be list!")
 
+    starttime = datetime.datetime.now()
     pred = []
     for blog_lst in test:
         score = rp.sentiment_logarithm_estimation(pos_lexicon_dict, neg_lexicon_dict, blog_lst)
@@ -160,6 +161,9 @@ def sentiment_lexicon_score(pos_lexicon_dict, neg_lexicon_dict, test, test_tag):
     y_pred = [1 if tag == 'pos' else 0 for tag in pred]
     pos_precision = precision_score(y_true, y_pred)
     pos_recall = recall_score(y_true, y_pred)
+    endtime = datetime.datetime.now()
+    interval = (endtime - starttime).microseconds
+    print('Sentiment Lexicon Score Time(MILLSECONDS) : %.2f' % (interval / 1000))
     return pos_precision, pos_recall, accuracy_score(test_tag, pred)
 
 #------------------------------------------------------------------------------
@@ -168,6 +172,7 @@ def classifier_score(tp, classifier, train_list, test, test_tag):
     传入分类器进行分类
     Output:pos_precision, pos_recall, accuracy_score
     '''
+    starttime = datetime.datetime.now()
     classifier = SklearnClassifier(classifier)
     classifier.train(train_list)
     iohelper.save_objects2pickle(classifier, './Reviews/' + tp + '.pkl')
@@ -176,6 +181,9 @@ def classifier_score(tp, classifier, train_list, test, test_tag):
     y_pred = [1 if tag == 'pos' else 0 for tag in pred]
     pos_precision = precision_score(y_true, y_pred)
     pos_recall = recall_score(y_true, y_pred)
+    endtime = datetime.datetime.now()
+    interval = (endtime - starttime).microseconds
+    print('%s Score Time(MILLSECONDS) : %.2f' % (tp, interval / 1000))
     return pos_precision, pos_recall, accuracy_score(test_tag, pred)
 
 #------------------------------------------------------------------------------
