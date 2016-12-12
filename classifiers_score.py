@@ -48,12 +48,12 @@ def main():
     negWords = list(itertools.chain(*neg_tk_lst)) #同理
 
     # 二选一(前面是所有词，后面是所有词+双词，基于卡方检验疾进行特征选择)
-    print('1.Word Feature Selection-Chi-sq!')
-    word_scores = create_word_scores(posWords, negWords)
-    # print('2.Word_Plus_Bigram Feature Selection-Chi-sq!')
-    # pos_tk_lst = words_plus_bigram(pos_tk_lst)
-    # neg_tk_lst = words_plus_bigram(neg_tk_lst)
-    # word_scores = create_word_bigram_scores(posWords, negWords)
+    # print('1.Word Feature Selection-Chi-sq!')
+    # word_scores = create_word_scores(posWords, negWords)
+    print('2.Word_Plus_Bigram Feature Selection-Chi-sq!')
+    pos_tk_lst = words_plus_bigram(pos_tk_lst)
+    neg_tk_lst = words_plus_bigram(neg_tk_lst)
+    word_scores = create_word_bigram_scores(posWords, negWords)
 
     global best_words
     best_words = find_best_words(word_scores, 1500)
@@ -65,7 +65,7 @@ def main():
     assert len(posFeatures) == len(negFeatures)
     print ('-------------------------------------------------')
 
-    Classifier_Type = ['Lexicons', 'LR', 'BernoulliNB', 'MultinomialNB', 'LinearSVC', 'NuSVC', 'SVC']
+    Classifier_Type = ['Lexicons', 'LR', 'BernoulliNB', 'MultinomialNB', 'LinearSVC', 'NuSVC']      # 'SVC' IS CANCELLED
     (pos_lexicon_dict, neg_lexicon_dict) = rp.load_sentiment_lexicon()
 
     # 10_fold_cross-validation(10折交叉验证)
@@ -74,10 +74,12 @@ def main():
     avg_scores = {}
     avg_precision = {}
     avg_recall = {}
+    avg_time = {}
     for tp in Classifier_Type:
         avg_scores[tp] = 0.0
         avg_precision[tp] = 0.0
         avg_recall[tp] = 0.0
+        avg_time[tp] = 0.0
     posTmp = []
     negTmp = []
     # 比较不同分类器的效果(主要分为基于情感词典的和基于监督式学习的)
@@ -85,6 +87,7 @@ def main():
         precision = 0.0
         recall = 0.0
         score = 0.0
+        time = 0.0
         if tp == 'Lexicons':
             posTmp = posFeatures
             negTmp = negFeatures
@@ -105,25 +108,26 @@ def main():
                 test = test_list
                 test_tag = ['pos' for i in range(offset_size)]
                 test_tag.extend(['neg' for i in range(offset_size)])
-                precision, recall, score = sentiment_lexicon_score(pos_lexicon_dict, neg_lexicon_dict, test, test_tag)
+                time, precision, recall, score = sentiment_lexicon_score(pos_lexicon_dict, neg_lexicon_dict, test, test_tag)
             else:
                 test, test_tag = zip(*test_list)  # 将内部的元素list(dict和string)分解成两类tuple({}, {}, {},...)和('pos', 'pos', 'neg', ...)
                 if tp == 'LR':
-                    precision, recall, score = classifier_score(tp, LogisticRegression(), train_list, test, test_tag)
+                    time, precision, recall, score = classifier_score(tp, LogisticRegression(), train_list, test, test_tag)
                 elif tp == 'BernoulliNB':
-                    precision, recall, score = classifier_score(tp, BernoulliNB(), train_list, test, test_tag)
+                    time, precision, recall, score = classifier_score(tp, BernoulliNB(), train_list, test, test_tag)
                 elif tp == 'MultinomialNB':
-                    precision, recall, score = classifier_score(tp, MultinomialNB(), train_list, test, test_tag)
+                    time, precision, recall, score = classifier_score(tp, MultinomialNB(), train_list, test, test_tag)
                 elif tp == 'LinearSVC':
-                    precision, recall, score = classifier_score(tp, LinearSVC(), train_list, test, test_tag)
+                    time, precision, recall, score = classifier_score(tp, LinearSVC(), train_list, test, test_tag)
                 elif tp == 'NuSVC':
-                    precision, recall, score = classifier_score(tp, NuSVC(probability=True), train_list, test, test_tag)
+                    time, precision, recall, score = classifier_score(tp, NuSVC(probability=True), train_list, test, test_tag)
                 elif tp == 'SVC':
                     precision, recall, score = classifier_score(tp, SVC(gamma=0.001, C=100., kernel='linear', probability=True), train_list, test, test_tag)
             avg_scores[tp] += score
             avg_precision[tp] += precision
             avg_recall[tp] += recall
-            print ('The precision recall accuracy score is repectively : %f %f %f' % (precision, recall, score))
+            avg_time[tp] += time
+            print ('The precision recall accuracy score and training time is repectively : %f %f %f %f' % (precision, recall, score, time))
         if tp == 'Lexicons':
             posFeatures = posTmp
             negFeatures = negTmp
@@ -134,8 +138,9 @@ def main():
         avg_scores[tp] = avg_scores[tp] / 10
         avg_precision[tp] = avg_precision[tp] / 10
         avg_recall[tp] = avg_recall[tp] / 10
-        print ("The %s\'s average precision recall accuracy score is repectively : %.2f %.2f %.2f" % \
-            (tp, avg_precision[tp], avg_recall[tp], avg_scores[tp]))
+        avg_time[tp] = avg_time[tp] / 10
+        print ("The %s\'s average precision recall accuracy score and training time is repectively : %.2f %.2f %.2f %.2f" % \
+            (tp, avg_precision[tp], avg_recall[tp], avg_scores[tp], avg_time[tp]))
     print ("The End!")
 
 #------------------------------------------------------------------------------
@@ -163,8 +168,8 @@ def sentiment_lexicon_score(pos_lexicon_dict, neg_lexicon_dict, test, test_tag):
     pos_recall = recall_score(y_true, y_pred)
     endtime = datetime.datetime.now()
     interval = (endtime - starttime).microseconds
-    print('Sentiment Lexicon Score Time(MILLSECONDS) : %.2f' % (interval / 1000))
-    return pos_precision, pos_recall, accuracy_score(test_tag, pred)
+    interval = interval / 100
+    return interval, pos_precision, pos_recall, accuracy_score(test_tag, pred)
 
 #------------------------------------------------------------------------------
 def classifier_score(tp, classifier, train_list, test, test_tag):
@@ -183,8 +188,8 @@ def classifier_score(tp, classifier, train_list, test, test_tag):
     pos_recall = recall_score(y_true, y_pred)
     endtime = datetime.datetime.now()
     interval = (endtime - starttime).microseconds
-    print('%s Score Time(MILLSECONDS) : %.2f' % (tp, interval / 1000))
-    return pos_precision, pos_recall, accuracy_score(test_tag, pred)
+    interval = interval / 100
+    return interval, pos_precision, pos_recall, accuracy_score(test_tag, pred)
 
 #------------------------------------------------------------------------------
 def words_plus_bigram(tk_lst, score_fn=BigramAssocMeasures.chi_sq):

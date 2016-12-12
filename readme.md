@@ -1,3 +1,4 @@
+
 ## Stock Index Prediction Based on Sentiment Analysis(基于情感分析的股指预测)
 
 ### Data Preprocessing(数据集预处理)
@@ -34,22 +35,20 @@
 
 ### The Classifying Result(分类结果)
 #### Not Using Bigrams
-- The Lexicons's average precision recall accuracy score is repectively : 0.95 0.93 0.94
-- The LR's average precision recall accuracy score is repectively : 0.91 0.90 0.90
-- The BernoulliNB's average precision recall accuracy score is repectively : 0.87 0.82 0.85
-- The MultinomialNB's average precision recall accuracy score is repectively : 0.87 0.80 0.84
-- The LinearSVC's average precision recall accuracy score is repectively : 0.90 0.89 0.90
-- The NuSVC's average precision recall accuracy score is repectively : 0.89 0.88 0.89
-- The SVC's average precision recall accuracy score is repectively : 0.85 0.85 0.85
+- The Lexicons's average precision recall accuracy score and training time is repectively : 0.95 0.93 0.94 61.71
+- The LR's average precision recall accuracy score and training time is repectively : 0.91 0.90 0.90 1034.24
+- The BernoulliNB's average precision recall accuracy score and training time is repectively : 0.87 0.82 0.85 914.35
+- The MultinomialNB's average precision recall accuracy score and training time is repectively : 0.87 0.80 0.84 865.76
+- The LinearSVC's average precision recall accuracy score and training time is repectively : 0.90 0.89 0.89 1384.62
+- The NuSVC's average precision recall accuracy score and training time is repectively : 0.89 0.88 0.89 4547.88
 
 #### Using Bigrams
-- The Lexicon's average precision recall accuracy score is repectively : 0.95 0.93 0.94
-- The LR's average precision recall accuracy score is repectively : 0.91 0.89 0.90
-- The BernoulliNB's average precision recall accuracy score is repectively : 0.87 0.81 0.85
-- The MultinomialNB's average precision recall accuracy score is repectively : 0.87 0.80 0.84
-- The LinearSVC's average precision recall accuracy score is repectively : 0.89 0.88 0.89
-- The NuSVC's average precision recall accuracy score is repectively : 0.90 0.88 0.89
-- The SVC's average precision recall accuracy score is repectively : 0.85 0.85 0.85
+- The Lexicons's average precision recall accuracy score and training time is repectively : 0.95 0.93 0.94 67.76
+- The LR's average precision recall accuracy score and training time is repectively : 0.91 0.89 0.90 1059.63
+- The BernoulliNB's average precision recall accuracy score and training time is repectively : 0.87 0.81 0.85 923.76
+- The MultinomialNB's average precision recall accuracy score and training time is repectively : 0.87 0.80 0.84 876.03
+- The LinearSVC's average precision recall accuracy score and training time is repectively : 0.89 0.88 0.89 1356.66
+- The NuSVC's average precision recall accuracy score and training time is repectively : 0.90 0.88 0.89 5283.03
 
 ### The Prediction Result(预测结果)
 - contains historical data and plus sentiment index(based on lexicons and best-classifier:LR)
