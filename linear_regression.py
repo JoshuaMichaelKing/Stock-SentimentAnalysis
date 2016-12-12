@@ -87,24 +87,24 @@ def linear_regression(train_x, train_y, test_x, test_y):
     mape_predict = mape(y_predict, test_y)
 
     # 绘制对比图
-    # global num_of_closing_price_to_predicate
-    # dir_list = []
-    # dir_list.extend(date_of_march[1:])  # 跳过第一天
-    # dir_list.extend(date_of_april)
-    # dir_list.extend(date_of_may)
-    # day = 0
-    # begin = num_of_closing_price_to_predicate
-    # for one_day in dir_list:
-    #     day_start = begin + day * 48
-    #     day_end = day_start + 48
-    #     global forward_unit, use_emotion
-    #     picture_name_suffix = ''
-    #     if use_emotion:
-    #         picture_name_suffix = str(forward_unit) + 'emotion'
-    #     picture(y_fit[day_start:day_end], train_y[day_start:day_end], 'train'+picture_name_suffix+one_day)
-    #     if day_end <= len(y_predict):
-    #         picture(y_predict[day_start:day_end], test_y[day_start:day_end], 'predict'+picture_name_suffix+date_of_june[day+1])
-    #     day += 1
+    global num_of_closing_price_to_predicate
+    dir_list = []
+    dir_list.extend(date_of_march[1:])  # 跳过第一天
+    dir_list.extend(date_of_april)
+    dir_list.extend(date_of_may)
+    day = 0
+    begin = num_of_closing_price_to_predicate
+    for one_day in dir_list:
+        day_start = begin + day * 48
+        day_end = day_start + 48
+        global forward_unit, use_emotion
+        picture_name_suffix = ''
+        if use_emotion:
+            picture_name_suffix = str(forward_unit) + 'emotion'
+        picture(y_fit[day_start:day_end], train_y[day_start:day_end], 'train'+picture_name_suffix+one_day)
+        if day_end <= len(y_predict):
+            picture(y_predict[day_start:day_end], test_y[day_start:day_end], 'predict'+picture_name_suffix+date_of_june[day+1])
+        day += 1
     return [[ma_fit, rmse_fit, mape_fit], [ma_predict, rmse_predict, mape_predict]]
 
 #------------------------------------------------------------------------------

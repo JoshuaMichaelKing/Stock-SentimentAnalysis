@@ -97,9 +97,8 @@ def sentiment_index_compute(pos_lexicon_dict, neg_lexicon_dict):
     '20160523', '20160524', '20160525', '20160526', '20160527',
     '20160530', '20160531']
     # june = 10 (compute 10 days sentiment index to make correlation analysis)
-    date_of_june = ['20160606',
-    '20160613', '20160614', '20160615',
-    '20160620', '20160622', '20160624', '20160628']
+    date_of_june = ['20160601', '20160602', '20160606', '20160613',
+    '20160614', '20160615', '20160620', '20160622', '20160624', '20160628']
     # review_list_day.extend(date_of_march)
     # review_list_day.extend(date_of_april)
     # review_list_day.extend(date_of_may)
