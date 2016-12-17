@@ -154,9 +154,11 @@ def picture(y_model, y_real=None, name=None):
     # p1.xaxis.set_major_formatter(FuncFormatter(format_fn))
     # p1.xaxis.set_major_locator(MaxNLocator(integer=True, nbins=12))
     x = range(1, len(y_model)+1)
-    p1.plot(x, y_model, 'o-', label="model", color="red", linewidth=1)
     if y_real is not None:
+        p1.plot(x, y_model, 'o-', label="model", color="red", linewidth=1)
         p1.plot(x, y_real, 'o-', label="real", color="blue", linewidth=1)
+    else:
+        p1.plot(x, y_model, label="$SCI$", color="red", linewidth=1)
     if name is None:
         name = 'Shanghai Composite Index'
 
