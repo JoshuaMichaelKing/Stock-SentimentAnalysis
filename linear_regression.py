@@ -130,7 +130,7 @@ def print_metrics(metrics_list):
     # print('%16s : %10f%10f%10f' % ('Training-Metrics', metrics_list[0][0], metrics_list[0][1], metrics_list[0][2]))
     print('%s : %10f%10f%10f' % ('Test-Metrics', metrics_list[1][0], metrics_list[1][1], metrics_list[1][2]))
 
-def picture(y_model, y_real, name):
+def picture(y_model, y_real=None, name=None):
     '''
     绘制对比图
     '''
@@ -155,7 +155,10 @@ def picture(y_model, y_real, name):
     # p1.xaxis.set_major_locator(MaxNLocator(integer=True, nbins=12))
     x = range(1, len(y_model)+1)
     p1.plot(x, y_model, 'o-', label="model", color="red", linewidth=1)
-    p1.plot(x, y_real, 'o-', label="real", color="blue", linewidth=1)
+    if y_real is not None:
+        p1.plot(x, y_real, 'o-', label="real", color="blue", linewidth=1)
+    if name is None:
+        name = 'Shanghai Composite Index'
 
     plt.title(name)
     plt.xlabel("time")
@@ -185,6 +188,9 @@ def read_data():
         # 情感数据
         train_seq = iohelper.read_pickle2objects(subdir, 'saindex_seq')
         original_train_data[1].extend(map(float, train_seq))
+
+    picture(original_train_data[0])
+    assert 1 == 0
 
     # 测试集
     original_test_data = [[], []]
